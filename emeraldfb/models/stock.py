@@ -2,17 +2,7 @@
 import datetime
 
 from datetime import date, timedelta
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError, AccessError
-from odoo.tools import float_is_zero
-
-from functools import partial
-from odoo.tools.misc import formatLang
-
-from dateutil.relativedelta import relativedelta
-import logging
-
-_logger = logging.getLogger(__name__)
+from odoo import models, fields, api
 
 class Picking(models.Model):
     _name = "stock.picking"
