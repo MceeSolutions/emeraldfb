@@ -2,5 +2,125 @@
 <odoo>
 	<data>
 	
+	<!-- Training Tracker action-->
+    <record model="ir.actions.act_window" id="emeraldfb_training_tracker_action">
+		<field name="name">Training Tracker</field>
+		<field name="res_model">emeraldfb.training.tracker</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="domain">[]</field>
+		<field name="context">{}</field>
+	</record>
+	
+	<!-- Staff Recruitment action-->
+    <record model="ir.actions.act_window" id="staff_recruitment_action">
+		<field name="name">Staff Recruitment</field>
+		<field name="res_model">staff.recruitment</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="domain">[]</field>
+		<field name="context">{}</field>
+	</record>
+	
+	 <!-- training tracker -->
+    <record model="ir.ui.view" id="emerald_training_tracker_tree_view">
+		<field name="name">emeraldfb.training.tracker.tree</field>
+		<field name="model">emeraldfb.training.tracker</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree>
+				<field name="employee_id"/>
+				<field name="provider"/>
+				<field name="training_start_date"/>
+				<field name="training_date_end"/>
+			</tree>
+		</field>
+	</record>
+	
+	<record model="ir.ui.view" id="ninas_training_tracker_form_view">
+		<field name="name">emeraldfb.training.tracker.form</field>
+		<field name="model">emeraldfb.training.tracker</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Employee Training Tracker">
+				<header>
+	        		<button name="button_approve" string="Approve" type="object" class="btn btn-primary" states="new" groups="ninasmain.group_hr_line_manager"/>
+	        		<button name="button_reject" string="Reject" type="object" class="btn btn-danger" states="new" groups="ninasmain.group_hr_line_manager"/>
+	        		<button name="button_approve_lm" string="Approve" type="object" class="btn btn-primary" states="validate"/>
+	        		<field name="state" widget="statusbar" statusbar_visible="new,validate,approve,reject" readonly="1"/>
+	        	</header>
+				<sheet>
+					<group col="2" colspan="2">
+						<field name="employee_id"/>
+					</group>
+					<group col="4" colspan="2">
+						<field name="position"/>
+						<field name="provider"/>
+						<field name="training_start_date"/>
+						<field name="training_date_end"/>
+						<field name="capability" widget="priority"/>
+						<field name="review"/>
+					</group>
+						<strong>Notes</strong><br/>
+						<field name="notes" widget="html"/>
+				</sheet>
+				<div class="oe_chatter">
+			             <field name="message_follower_ids" widget="mail_followers"/>
+			             <field name="activity_ids" widget="mail_activity"/>
+			             <field name="message_ids" widget="mail_thread"/>
+			        </div>
+			</form>
+		</field>
+	</record>
+	
+	<!-- staff recruitment -->
+    <record model="ir.ui.view" id="staff_recruitment_tree_view">
+		<field name="name">staff.recruitment.tree</field>
+		<field name="model">staff.recruitment</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree>
+				<field name="employee_id"/>
+				<field name="job_id"/>
+			</tree>
+		</field>
+	</record>
+	
+	<record model="ir.ui.view" id="staff_recruitment_form_view">
+		<field name="name">staff.recruitment.form</field>
+		<field name="model">staff.recruitment</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Staff Recruitment">
+				<header>
+					<button name="button_submit" string="Submit Request" type="object" class="btn btn-primary" states="new"/>
+	        		<button name="button_approve" string="Approve" type="object" class="btn btn-primary" states="submit"/>
+	        		<button name="button_reject" string="Reject" type="object" class="btn btn-danger" states="submit"/>
+	        		<button name="button_approve_lm" string="Approve" type="object" class="btn btn-primary" states="approve"/>
+	        		<field name="state" widget="statusbar" statusbar_visible="new,submit,approve,validate,reject" readonly="1"/>
+	        	</header>
+				<sheet>
+					<group col="2" colspan="2">
+						<field name="employee_id"/>
+					</group>
+					<group col="4" colspan="2">
+						<field name="job_id"/>
+						<field name="priority" widget="priority"/>
+					</group>
+						<strong>Reason For Request</strong><br/>
+						<field name="reason" widget="html"/>
+				</sheet>
+				<div class="oe_chatter">
+			             <field name="message_follower_ids" widget="mail_followers"/>
+			             <field name="activity_ids" widget="mail_activity"/>
+			             <field name="message_ids" widget="mail_thread"/>
+			        </div>
+			</form>
+		</field>
+	</record>
+	
+	<menuitem name="Employee Training Tracker" id="emeraldfb_training_tracker_menuitem" parent="hr.menu_hr_root" action="emeraldfb_training_tracker_action"/>
+	<menuitem name="Staff Recruitment" id="staff_recruitment_menuitem" parent="hr.menu_hr_root" action="staff_recruitment_action"/>
+	
 	</data>
 </odoo>

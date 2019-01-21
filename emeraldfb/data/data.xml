@@ -18,5 +18,11 @@
             <field name="sequence_id">20</field>
         </record>
         
+        <record id="seq_training_tracker" model="ir.sequence">
+        	<field name="name">Training Tracker</field>
+        	<field name="code">emeraldfb.training.tracker</field>
+        	<field name="padding">3</field>
+        </record>
+        
     </data>
 </odoo>

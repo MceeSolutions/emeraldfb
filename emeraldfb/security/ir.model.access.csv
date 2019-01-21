@@ -1,1 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_emeraldfb_training_tracker_emp,emeraldfb.training.tracker,model_emeraldfb_training_tracker,base.group_user,1,0,0,0
+access_staff_recruitment,staff.recruitment,model_staff_recruitment,base.group_user,1,1,1,0
