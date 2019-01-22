@@ -7,6 +7,11 @@
 	        <field name="category_id" ref="base.module_category_human_resources"/>
 	        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
 	    </record>
-	
+		
+		<record id="group_cmo" model="res.groups">
+	        <field name="name">Chief Makreting Officer</field>
+	        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    	</record>
+		
 	</data>
 </odoo>
