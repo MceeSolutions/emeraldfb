@@ -241,7 +241,11 @@ class CustomerRequest(models.Model):
         ('approve', 'Approved'),
         ('reject', 'Rejected'),
         ], string='Status', readonly=True, index=True, copy=False, default='draft', track_visibility='onchange')          
-          
+    
+    @api.depends('is_company', 'parent_id.commercial_partner_id')
+    def _compute_commercial_partner(self):
+        return {}
+         
     @api.multi
     def button_reset(self):
         self.write({'state': 'draft'})
@@ -272,6 +276,8 @@ class CustomerRequest(models.Model):
             'mobile' : self.mobile,
             'email' : self.email,
             'customer': self.customer,
+            'user_id': self.user_id.id,
+            'property_product_pricelist': self.property_product_pricelist.id,
             'supplier' : self.supplier,
             'supplier' : self.company_id.id
         }
