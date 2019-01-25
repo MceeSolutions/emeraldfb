@@ -188,9 +188,29 @@
 	         <field name="act_window_id" ref="store_req_action1_window"/>
      	</record>
 	    
+	    <record model="ir.actions.act_window" id="emerald_action_stock_scrap">
+            <field name="name">Productions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.scrap</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click here to productions.
+              </p><!--  <p>
+                Scrapping a product will remove it from your stock. The product will
+                end up in a scrap location that can be used for reporting purpose.
+              </p>-->
+            </field>
+        </record>
+	    
 	 
 		<menuitem name="Store Request" id="store_request" parent="stock.menu_stock_root"
               action="store_req_action1_window"/>
+              
+        <menuitem name="Production" id="emeraldfb_production_main_menu"/>
+    	<menuitem name="Production" id="emeraldfb_production_tools_main_menu" parent="emeraldfb_production_main_menu"/>
+        <menuitem id="menu_stock_scrap" name="Production" parent="emeraldfb_production_main_menu" action="emerald_action_stock_scrap" sequence="99"/>
 		
 		
 	</data>

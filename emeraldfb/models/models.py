@@ -289,12 +289,66 @@ class CustomerRequest(models.Model):
         self.write({'state': 'reject'})
         return {}
     
+'''
+class EmeraldProduction(models.Model):
     
+    _name = "emerald.production"
     
+    def _get_default_scrap_location_id(self):
+        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [self.env.user.company_id.id, False])], limit=1).id
+
+    def _get_default_location_id(self):
+        company_user = self.env.user.company_id
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        if warehouse:
+            return warehouse.lot_stock_id.id
+        return None
+
+    name = fields.Char(
+        'Reference',  default=lambda self: _('New'),
+        copy=False, readonly=True, required=True,
+        states={'done': [('readonly', True)]})
+    origin = fields.Char(string='Source Document')
+    product_id = fields.Many2one(
+        'product.product', 'Product',
+        required=True, states={'done': [('readonly', True)]})
+    product_uom_id = fields.Many2one(
+        'product.uom', 'Unit of Measure',
+        required=True, states={'done': [('readonly', True)]})
+    tracking = fields.Selection('Product Tracking', readonly=True, related="product_id.tracking")
+    lot_id = fields.Many2one(
+        'stock.production.lot', 'Lot',
+        states={'done': [('readonly', True)]}, domain="[('product_id', '=', product_id)]")
+    package_id = fields.Many2one(
+        'stock.quant.package', 'Package',
+        states={'done': [('readonly', True)]})
+    owner_id = fields.Many2one('res.partner', 'Owner', states={'done': [('readonly', True)]})
+    move_id = fields.Many2one('stock.move', 'Scrap Move', readonly=True)
+    picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]})
+    location_id = fields.Many2one(
+        'stock.location', 'Location', domain="[('usage', '=', 'internal')]",
+        required=True, states={'done': [('readonly', True)]}, default=_get_default_location_id)
+    scrap_location_id = fields.Many2one(
+        'stock.location', 'Scrap Location', default=_get_default_scrap_location_id,
+        domain="[('scrap_location', '=', True)]", required=True, states={'done': [('readonly', True)]})
+    scrap_qty = fields.Float('Quantity', default=1.0, required=True, states={'done': [('readonly', True)]})
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('done', 'Done')], string='Status', default="draft")
+    date_expected = fields.Datetime('Expected Date', default=fields.Datetime.now)
     
+    @api.model
+    def create(self, vals):
+        if 'name' not in vals or vals['name'] == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('stock.scrap') or _('New')
+        scrap = super(StockScrap, self).create(vals)
+        return scrap
+
+    def unlink(self):
+        if 'done' in self.mapped('state'):
+            raise UserError(_('You cannot delete a scrap which is done.'))
+        return super(StockScrap, self).unlink()
     
-    
-    
-    
+'''
     
     
