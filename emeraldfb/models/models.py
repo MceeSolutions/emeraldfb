@@ -225,7 +225,11 @@ class StaffRecruitment(models.Model):
     def button_reject(self):
         self.write({'state': 'reject'})
         return {}
-    
+
+class Partner(models.Model):
+    _inherit = 'res.partner'
+
+    payment_term_id = fields.Many2one(comodel_name = 'account.payment.term', string ='Payment Terms')
     
     
 class CustomerRequest(models.Model):
@@ -241,6 +245,8 @@ class CustomerRequest(models.Model):
         ('approve', 'Approved'),
         ('reject', 'Rejected'),
         ], string='Status', readonly=True, index=True, copy=False, default='draft', track_visibility='onchange')          
+    
+    payment_term_id = fields.Many2one(comodel_name = 'account.payment.term', string ='Payment Terms')
     
     @api.depends('is_company', 'parent_id.commercial_partner_id')
     def _compute_commercial_partner(self):
@@ -278,6 +284,7 @@ class CustomerRequest(models.Model):
             'customer': self.customer,
             'user_id': self.user_id.id,
             'property_product_pricelist': self.property_product_pricelist.id,
+            'payment_term_id': self.payment_term_id.id,
             'supplier' : self.supplier,
             'supplier' : self.company_id.id
         }
@@ -289,66 +296,52 @@ class CustomerRequest(models.Model):
         self.write({'state': 'reject'})
         return {}
     
-'''
-class EmeraldProduction(models.Model):
+class Employee(models.Model):
+    _inherit = 'hr.employee'
     
-    _name = "emerald.production"
     
-    def _get_default_scrap_location_id(self):
-        return self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [self.env.user.company_id.id, False])], limit=1).id
+    @api.multi
+    def send_birthday_reminder_mail(self):
 
-    def _get_default_location_id(self):
-        company_user = self.env.user.company_id
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
-        if warehouse:
-            return warehouse.lot_stock_id.id
-        return None
-
-    name = fields.Char(
-        'Reference',  default=lambda self: _('New'),
-        copy=False, readonly=True, required=True,
-        states={'done': [('readonly', True)]})
-    origin = fields.Char(string='Source Document')
-    product_id = fields.Many2one(
-        'product.product', 'Product',
-        required=True, states={'done': [('readonly', True)]})
-    product_uom_id = fields.Many2one(
-        'product.uom', 'Unit of Measure',
-        required=True, states={'done': [('readonly', True)]})
-    tracking = fields.Selection('Product Tracking', readonly=True, related="product_id.tracking")
-    lot_id = fields.Many2one(
-        'stock.production.lot', 'Lot',
-        states={'done': [('readonly', True)]}, domain="[('product_id', '=', product_id)]")
-    package_id = fields.Many2one(
-        'stock.quant.package', 'Package',
-        states={'done': [('readonly', True)]})
-    owner_id = fields.Many2one('res.partner', 'Owner', states={'done': [('readonly', True)]})
-    move_id = fields.Many2one('stock.move', 'Scrap Move', readonly=True)
-    picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]})
-    location_id = fields.Many2one(
-        'stock.location', 'Location', domain="[('usage', '=', 'internal')]",
-        required=True, states={'done': [('readonly', True)]}, default=_get_default_location_id)
-    scrap_location_id = fields.Many2one(
-        'stock.location', 'Scrap Location', default=_get_default_scrap_location_id,
-        domain="[('scrap_location', '=', True)]", required=True, states={'done': [('readonly', True)]})
-    scrap_qty = fields.Float('Quantity', default=1.0, required=True, states={'done': [('readonly', True)]})
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('done', 'Done')], string='Status', default="draft")
-    date_expected = fields.Datetime('Expected Date', default=fields.Datetime.now)
+        employees = self.env['hr.employee'].search([])
+        
+        current_dates = False
+        
+        for self in employees:
+            if self.birthday:
+                
+                current_dates = datetime.datetime.strptime(self.birthday, "%Y-%m-%d")
+                current_datesz = current_dates - relativedelta(days=3)
+                print(current_datesz)
+                
+                date_start_day = current_datesz.day
+                date_start_month = current_datesz.month
+                date_start_year = current_datesz.year
+                
+                today = datetime.datetime.now().strftime("%Y-%m-%d")
+                
+                test_today = datetime.datetime.today().strptime(today, "%Y-%m-%d")
+                date_start_day_today = test_today.day
+                date_start_month_today = test_today.month
+                date_start_year_today = test_today.year
+                
+                
+                if date_start_month == date_start_month_today:
+                    if date_start_day == date_start_day_today:
+                        config = self.env['mail.template'].sudo().search([('name','=','Birthday Reminder HR')], limit=1)
+                        mail_obj = self.env['mail.mail']
+                        if config:
+                            values = config.generate_email(self.id)
+                            mail = mail_obj.create(values)
+                            if mail:
+                                mail.send()
+                            return True
+        return
     
-    @api.model
-    def create(self, vals):
-        if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('stock.scrap') or _('New')
-        scrap = super(StockScrap, self).create(vals)
-        return scrap
-
-    def unlink(self):
-        if 'done' in self.mapped('state'):
-            raise UserError(_('You cannot delete a scrap which is done.'))
-        return super(StockScrap, self).unlink()
+class HrPayslipWorkedDays(models.Model):
+    _inherit = 'hr.payslip.worked_days'
     
-'''
+    number_of_days = fields.Float(string='Absent Days')
+    
     
     

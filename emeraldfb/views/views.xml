@@ -81,6 +81,17 @@
 		</field>
 	</record>
 	
+	<record id="partner_emeraldfb" model="ir.ui.view">
+	    <field name="name">partner.emeraldfb</field>
+	    <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_partner_form"/>
+	    <field name="arch" type="xml">
+	    <field name="property_product_pricelist" position="after">
+    		<field name="payment_term_id"/>
+		</field>
+	    </field>
+	</record>
+	
 	<!-- staff recruitment -->
     <record model="ir.ui.view" id="staff_recruitment_tree_view">
 		<field name="name">staff.recruitment.tree</field>
@@ -191,6 +202,7 @@
 	                    <field name="phone" widget="phone" required="1"/>
 	                    <field name="mobile" widget="phone"/>
 	                    <field name="email" widget="email" context="{'gravatar_image': True}" attrs="{'required': [('is_company', '=', True)]}"/>
+	                    <field name="payment_term_id" attrs="{'required': [('is_company', '=', True)]}"/>
 	                    <field name="user_id"/>
 	                    <field name="property_product_pricelist"/>
 	                    <field name="company_id" groups="base.group_system"/>
