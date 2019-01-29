@@ -80,3 +80,81 @@ class Picking(models.Model):
             for partner in self.sheet_id.message_partner_ids:
                 partner_ids.append(partner.id)
             self.sheet_id.message_post(subject=subject,body=subject,partner_ids=partner_ids)
+            
+class HrExpense(models.Model):
+
+    _name = "hr.expense"
+    _inherit = 'hr.expense'
+    
+    vendor_id = fields.Many2one('res.partner', string="Vendor", domain=[('supplier', '=', True)], readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]})
+    
+    @api.multi
+    def approve_employee_expense_sheets_notification(self):
+        group_id = self.env['ir.model.data'].xmlid_to_object('emeraldfb.group_coo')
+        user_ids = []
+        partner_ids = []
+        for user in group_id.users:
+            user_ids.append(user.id)
+            partner_ids.append(user.partner_id.id)
+        self.message_subscribe_users(user_ids=user_ids)
+        subject = "Expense {} needs a COO Approval".format(self.name)
+        self.message_post(subject=subject,body=subject,partner_ids=partner_ids)
+        return False
+    
+    @api.multi
+    def submit_expenses(self):
+        if any(expense.state != 'draft' for expense in self):
+            raise UserError(_("You cannot report twice the same line!"))
+        if len(self.mapped('employee_id')) != 1:
+            raise UserError(_("You cannot report expenses for different employees in the same report!"))
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'hr.expense.sheet',
+            'target': 'current',
+            'context': {
+                'default_expense_line_ids': [line.id for line in self],
+                'default_employee_id': self[0].employee_id.id,
+                'default_name': self[0].name if len(self.ids) == 1 else '',
+                'default_vendor_id' :  self[0].vendor_id.id if self[0].vendor_id else ''
+            }
+        }        
+            
+    
+class HrExpenseSheet(models.Model):
+    _name = "hr.expense.sheet"
+    _inherit = 'hr.expense.sheet'
+    
+    state = fields.Selection([('submit', 'Submitted'),
+                              ('coo_approve', 'Coo Approved'),
+                              ('approve', 'HR Approved'),
+                              ('post', 'Posted'),
+                              ('done', 'Paid'),
+                              ('cancel', 'Refused')
+                              ], string='Status', index=True, readonly=True, track_visibility='onchange', copy=False, default='submit', required=True,
+    help='Expense Report State')
+    
+    @api.multi
+    def approve_employee_expense_sheets(self):
+        self.write({'state': 'coo_approve'})
+        group_id = self.env['ir.model.data'].xmlid_to_object('hr.group_hr_manager')
+        user_ids = []
+        partner_ids = []
+        for user in group_id.users:
+            user_ids.append(user.id)
+            partner_ids.append(user.partner_id.id)
+        self.message_subscribe_users(user_ids=user_ids)
+        subject = "Expense {} needs a HR Approval".format(self.name)
+        self.message_post(subject=subject,body=subject,partner_ids=partner_ids)
+        return False
+    
+    @api.multi
+    def refuse_employee_expense_sheets(self):
+        self.write({'state': 'cancel'})
+    
+    @api.multi
+    def approve_expense_sheets(self):
+        if not self.user_has_groups('hr.group_hr_manager'):
+            raise UserError(_("Only HR Managers can approve expenses"))
+        
+        self.write({'state': 'approve', 'responsible_id': self.env.user.id})
