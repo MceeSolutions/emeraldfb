@@ -126,8 +126,8 @@ class HrExpenseSheet(models.Model):
     _inherit = 'hr.expense.sheet'
     
     state = fields.Selection([('submit', 'Submitted'),
-                              ('coo_approve', 'Coo Approved'),
-                              ('approve', 'HR Approved'),
+                              ('confirm', 'Confirmed'),
+                              ('approve', 'Approved'),
                               ('post', 'Posted'),
                               ('done', 'Paid'),
                               ('cancel', 'Refused')
@@ -136,15 +136,15 @@ class HrExpenseSheet(models.Model):
     
     @api.multi
     def approve_employee_expense_sheets(self):
-        self.write({'state': 'coo_approve'})
-        group_id = self.env['ir.model.data'].xmlid_to_object('hr.group_hr_manager')
+        self.write({'state': 'confirm'})
+        group_id = self.env['ir.model.data'].xmlid_to_object('emeraldfb.group_coo')
         user_ids = []
         partner_ids = []
         for user in group_id.users:
             user_ids.append(user.id)
             partner_ids.append(user.partner_id.id)
         self.message_subscribe_users(user_ids=user_ids)
-        subject = "Expense {} needs a HR Approval".format(self.name)
+        subject = "Expense {} needs COO Approval".format(self.name)
         self.message_post(subject=subject,body=subject,partner_ids=partner_ids)
         return False
     
