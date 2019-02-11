@@ -50,12 +50,14 @@ class Picking(models.Model):
         self.write({'state': 'draft'})
         return {}
     
+    '''
     @api.model
     def create(self, vals):
         a = super(Picking, self).create(vals)
         a.send_store_request_mail()
         return a
         return super(Picking, self).create(vals)
+    
     
     @api.multi
     def send_store_request_mail(self):
@@ -80,6 +82,7 @@ class Picking(models.Model):
             for partner in self.sheet_id.message_partner_ids:
                 partner_ids.append(partner.id)
             self.sheet_id.message_post(subject=subject,body=subject,partner_ids=partner_ids)
+    '''
             
 class HrExpense(models.Model):
 
@@ -158,3 +161,12 @@ class HrExpenseSheet(models.Model):
             raise UserError(_("Only HR Managers can approve expenses"))
         
         self.write({'state': 'approve', 'responsible_id': self.env.user.id})
+        
+        
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+    
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
+    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
+    
+

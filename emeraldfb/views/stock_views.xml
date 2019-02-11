@@ -197,6 +197,22 @@
             </field>
     </record>
 	    
+	    <record id="emerald_view_sales_order_filter" model="ir.ui.view">
+            <field name="name">emeraldfb.sale.order.list.select</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+	                <field name="state_id"/>
+	                <field name="city"/>
+	            </field>
+	            <xpath expr="//filter[@name='customer']" position="after">
+	            	<filter name="state" string="State" domain="[]" context="{'group_by':'state_id'}"/>
+	            	<filter name="city" string="City" domain="[]" context="{'group_by':'city'}"/>
+	            </xpath>
+	        </field>
+	 	</record>
+	    
    		<record model="ir.actions.act_window" id="store_req_action1_window">
 	      <field name="name">Store Request</field>
 	      <field name="res_model">stock.picking</field>
