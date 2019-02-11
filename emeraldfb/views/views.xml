@@ -88,9 +88,10 @@
 		<field name="arch" type="xml">
 			<form string="Employee Training Tracker">
 				<header>
-	        		<button name="button_approve" string="Approve" type="object" class="btn btn-primary" states="new" groups="ninasmain.group_hr_line_manager"/>
-	        		<button name="button_reject" string="Reject" type="object" class="btn btn-danger" states="new" groups="ninasmain.group_hr_line_manager"/>
-	        		<button name="button_approve_lm" string="Approve" type="object" class="btn btn-primary" states="validate"/>
+	        		<button name="button_approve" string="Approve" type="object" class="btn btn-primary" states="new" groups="hr.group_hr_manager"/>
+	        		<button name="button_reject" string="Reject" type="object" class="btn btn-danger" states="new" groups="hr.group_hr_manager"/>
+	        		<button name="button_approve_lm" string="Approve" type="object" class="btn btn-primary" states="validate" groups="emeraldfb.group_hr_line_manager"/>
+	        		<button name="button_reject" string="Reject" type="object" class="btn btn-danger" states="validate" groups="emeraldfb.group_hr_line_manager"/>
 	        		<field name="state" widget="statusbar" statusbar_visible="new,validate,approve,reject" readonly="1"/>
 	        	</header>
 				<sheet>
