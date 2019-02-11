@@ -4,6 +4,8 @@ import datetime
 from datetime import date, timedelta
 from odoo import models, fields, api
 
+from odoo.addons import decimal_precision as dp
+
 class Picking(models.Model):
     _name = "stock.picking"
     _inherit = 'stock.picking'
@@ -168,5 +170,21 @@ class SaleOrder(models.Model):
     
     state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
     city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
-    
 
+class PurchaseOrderLine(models.Model):
+    _name = "purchase.order.line"
+    _inherit = ['purchase.order.line']
+    
+    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    
+    @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
+    def _compute_amount(self):
+        for line in self:
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = line.taxes_id.compute_all(price, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
+            line.update({
+                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                'price_total': taxes['total_included'],
+                'price_subtotal': taxes['total_excluded'],
+            })
+            

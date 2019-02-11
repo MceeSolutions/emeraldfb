@@ -213,6 +213,18 @@
 	        </field>
 	 	</record>
 	    
+	    <record id="emeraldfb_purchase_form_view" model="ir.ui.view">
+	        <field name="name">emeraldfb.purchase.form</field>
+	        <field name="model">purchase.order</field>
+	        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+	        <field name="arch" type="xml">
+	        	<xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="before">
+	                <field name="discount"/>
+	            </xpath>
+	        </field>
+	    </record>
+	    
+	    
    		<record model="ir.actions.act_window" id="store_req_action1_window">
 	      <field name="name">Store Request</field>
 	      <field name="res_model">stock.picking</field>
