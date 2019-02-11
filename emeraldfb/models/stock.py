@@ -4,6 +4,8 @@ import datetime
 from datetime import date, timedelta
 from odoo import models, fields, api
 
+from odoo.addons import decimal_precision as dp
+
 class Picking(models.Model):
     _name = "stock.picking"
     _inherit = 'stock.picking'
@@ -50,12 +52,14 @@ class Picking(models.Model):
         self.write({'state': 'draft'})
         return {}
     
+    '''
     @api.model
     def create(self, vals):
         a = super(Picking, self).create(vals)
         a.send_store_request_mail()
         return a
         return super(Picking, self).create(vals)
+    
     
     @api.multi
     def send_store_request_mail(self):
@@ -80,6 +84,7 @@ class Picking(models.Model):
             for partner in self.sheet_id.message_partner_ids:
                 partner_ids.append(partner.id)
             self.sheet_id.message_post(subject=subject,body=subject,partner_ids=partner_ids)
+    '''
             
 class HrExpense(models.Model):
 
@@ -126,8 +131,8 @@ class HrExpenseSheet(models.Model):
     _inherit = 'hr.expense.sheet'
     
     state = fields.Selection([('submit', 'Submitted'),
-                              ('coo_approve', 'Coo Approved'),
-                              ('approve', 'HR Approved'),
+                              ('confirm', 'Confirmed'),
+                              ('approve', 'Approved'),
                               ('post', 'Posted'),
                               ('done', 'Paid'),
                               ('cancel', 'Refused')
@@ -136,15 +141,15 @@ class HrExpenseSheet(models.Model):
     
     @api.multi
     def approve_employee_expense_sheets(self):
-        self.write({'state': 'coo_approve'})
-        group_id = self.env['ir.model.data'].xmlid_to_object('hr.group_hr_manager')
+        self.write({'state': 'confirm'})
+        group_id = self.env['ir.model.data'].xmlid_to_object('emeraldfb.group_coo')
         user_ids = []
         partner_ids = []
         for user in group_id.users:
             user_ids.append(user.id)
             partner_ids.append(user.partner_id.id)
         self.message_subscribe_users(user_ids=user_ids)
-        subject = "Expense {} needs a HR Approval".format(self.name)
+        subject = "Expense {} needs COO Approval".format(self.name)
         self.message_post(subject=subject,body=subject,partner_ids=partner_ids)
         return False
     
@@ -158,3 +163,28 @@ class HrExpenseSheet(models.Model):
             raise UserError(_("Only HR Managers can approve expenses"))
         
         self.write({'state': 'approve', 'responsible_id': self.env.user.id})
+        
+        
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+    
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
+    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
+
+class PurchaseOrderLine(models.Model):
+    _name = "purchase.order.line"
+    _inherit = ['purchase.order.line']
+    
+    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    
+    @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
+    def _compute_amount(self):
+        for line in self:
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = line.taxes_id.compute_all(price, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
+            line.update({
+                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                'price_total': taxes['total_included'],
+                'price_subtotal': taxes['total_excluded'],
+            })
+            
