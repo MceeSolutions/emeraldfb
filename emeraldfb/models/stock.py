@@ -8,6 +8,10 @@ class Picking(models.Model):
     _name = "stock.picking"
     _inherit = 'stock.picking'
     
+    def _default_employee(self):
+        self.env['hr.employee'].search([('user_id','=',self.env.uid)])
+        return self.env['hr.employee'].search([('user_id','=',self.env.uid)])
+
     location_id = fields.Many2one(
         'stock.location', "Source Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
@@ -19,6 +23,10 @@ class Picking(models.Model):
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
     
+    employee_id = fields.Many2one('hr.employee', 'Employee',
+            states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, default=_default_employee,
+            help="Default Owner")
+
     @api.multi
     def manager_confirm(self):
         for order in self:
@@ -28,16 +36,8 @@ class Picking(models.Model):
     def _default_owner(self):
         return self.env.context.get('default_employee_id') or self.env['res.users'].browse(self.env.uid).partner_id
     
-    def _default_employee(self):
-        self.env['hr.employee'].search([('user_id','=',self.env.uid)])
-        return self.env['hr.employee'].search([('user_id','=',self.env.uid)])
-    
     owner_id = fields.Many2one('res.partner', 'Owner',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, default=_default_owner,
-        help="Default Owner")
-    
-    employee_id = fields.Many2one('hr.employee', 'Employee',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, default=_default_employee,
         help="Default Owner")
     
     man_confirm = fields.Boolean('Manager Confirmation', track_visibility='onchange')

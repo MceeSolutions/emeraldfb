@@ -299,6 +299,20 @@ class CustomerRequest(models.Model):
 class Employee(models.Model):
     _inherit = 'hr.employee'
     
+    address_home= fields.Char(string='Private Address')
+    next_of_kin = fields.Char(string='Next of Kin')
+    nok_address = fields.Char(string='Address')
+    nok_phone = fields.Char(string='Phone Number')
+
+    highest_level_of_education = fields.Char(string='Highest Level of Education')
+
+    guarantor1_name = fields.Char(string='Guarantor')
+    guarantor1_address = fields.Char(string='Address')
+    guarantor1_phone = fields.Char(string='Phone Number')
+
+    guarantor2_name = fields.Char(string='Guarantor')
+    guarantor2_address = fields.Char(string='Address')
+    guarantor2_phone = fields.Char(string='Phone Number')
     
     @api.multi
     def send_birthday_reminder_mail(self):
