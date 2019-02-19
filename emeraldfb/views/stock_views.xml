@@ -176,6 +176,9 @@
 	                <field name="employee_id" attrs="{'invisible': [('payment_mode', '!=', 'own_account')]}" groups="hr_expense.group_hr_expense_user"/>
 	                <field name="vendor_id" attrs="{'invisible': [('payment_mode', '=', 'own_account')],'required': [('payment_mode', '!=', 'own_account')]}"/>
 	            </field>
+	            <field name="account_id" position="replace">
+	                <field name="account_id" domain="[('internal_type', '=', 'other')]" groups="account.group_account_invoice"/>
+	            </field>
 	        </field>
 	 </record>
 	    
