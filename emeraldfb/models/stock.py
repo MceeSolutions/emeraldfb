@@ -179,8 +179,8 @@ class SaleReport(models.Model):
     _name = "sale.report"
     _inherit = "sale.report"
     
-    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
-    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', readonly=True)
+    city = fields.Char(string='City', readonly=True)
     
     def _select(self):
         select_str = """
@@ -202,8 +202,6 @@ class SaleReport(models.Model):
                     s.confirmation_date as confirmation_date,
                     s.state as state,
                     s.partner_id as partner_id,
-                    s.state_id as state_id,
-                    s.city as city,
                     s.user_id as user_id,
                     s.company_id as company_id,
                     extract(epoch from avg(date_trunc('day',s.date_order)-date_trunc('day',s.create_date)))/(24*60*60)::decimal(16,2) as delay,
@@ -212,6 +210,8 @@ class SaleReport(models.Model):
                     s.analytic_account_id as analytic_account_id,
                     s.team_id as team_id,
                     p.product_tmpl_id,
+                    partner.city as city,
+                    partner.state_id as state_id,
                     partner.country_id as country_id,
                     partner.commercial_partner_id as commercial_partner_id,
                     sum(p.weight * l.product_uom_qty / u.factor * u2.factor) as weight,
@@ -229,8 +229,6 @@ class SaleReport(models.Model):
                     s.date_order,
                     s.confirmation_date,
                     s.partner_id,
-                    s.state_id,
-                    s.city,
                     s.user_id,
                     s.state,
                     s.company_id,
@@ -238,6 +236,8 @@ class SaleReport(models.Model):
                     s.analytic_account_id,
                     s.team_id,
                     p.product_tmpl_id,
+                    partner.city,
+                    partner.state_id,
                     partner.country_id,
                     partner.commercial_partner_id
         """
