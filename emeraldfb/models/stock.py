@@ -172,9 +172,9 @@ class HrExpenseSheet(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
     
-    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
-    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
-
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True)
+    city = fields.Char(string='City', readonly=True, index=True, store=True)
+    
 class SaleReport(models.Model):
     _name = "sale.report"
     _inherit = "sale.report"
