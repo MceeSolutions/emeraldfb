@@ -2,7 +2,7 @@
 import datetime
 
 from datetime import date, timedelta
-from odoo import models, fields, api
+from odoo import api, fields, models, tools
 
 from odoo.addons import decimal_precision as dp
 
@@ -93,6 +93,9 @@ class HrExpense(models.Model):
     
     vendor_id = fields.Many2one('res.partner', string="Vendor", domain=[('supplier', '=', True)], readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]})
     
+    account_id = fields.Many2one('account.account', string='Account', states={'post': [('readonly', True)], 'done': [('readonly', True)], 'approve': [('readonly', False)]}, default=lambda self: self.env['ir.property'].get('property_account_expense_categ_id', 'product.category'),
+        help="An expense account is expected")
+    
     @api.multi
     def approve_employee_expense_sheets_notification(self):
         group_id = self.env['ir.model.data'].xmlid_to_object('emeraldfb.group_coo')
@@ -130,6 +133,7 @@ class HrExpenseSheet(models.Model):
     _name = "hr.expense.sheet"
     _inherit = 'hr.expense.sheet'
     
+    expense_line_ids = fields.One2many('hr.expense', 'sheet_id', string='Expense Lines', states={'approve': [('readonly', False)], 'done': [('readonly', True)], 'post': [('readonly', True)]}, copy=False)
     state = fields.Selection([('submit', 'Submitted'),
                               ('confirm', 'Confirmed'),
                               ('approve', 'Approved'),
@@ -168,15 +172,15 @@ class HrExpenseSheet(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
     
-    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
-    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
-
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True)
+    city = fields.Char(string='City', readonly=True, index=True, store=True)
+    
 class SaleReport(models.Model):
     _name = "sale.report"
     _inherit = "sale.report"
     
-    state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True, related='partner_id.state_id')
-    city = fields.Char(string='City', readonly=True, index=True, store=True, related='partner_id.city')
+    state_id = fields.Many2one(comodel_name="res.country.state", string='State', readonly=True)
+    city = fields.Char(string='City', readonly=True)
     
     def _select(self):
         select_str = """
@@ -198,8 +202,6 @@ class SaleReport(models.Model):
                     s.confirmation_date as confirmation_date,
                     s.state as state,
                     s.partner_id as partner_id,
-                    s.state_id as state_id,
-                    s.city as city,
                     s.user_id as user_id,
                     s.company_id as company_id,
                     extract(epoch from avg(date_trunc('day',s.date_order)-date_trunc('day',s.create_date)))/(24*60*60)::decimal(16,2) as delay,
@@ -208,6 +210,8 @@ class SaleReport(models.Model):
                     s.analytic_account_id as analytic_account_id,
                     s.team_id as team_id,
                     p.product_tmpl_id,
+                    partner.city as city,
+                    partner.state_id as state_id,
                     partner.country_id as country_id,
                     partner.commercial_partner_id as commercial_partner_id,
                     sum(p.weight * l.product_uom_qty / u.factor * u2.factor) as weight,
@@ -225,8 +229,6 @@ class SaleReport(models.Model):
                     s.date_order,
                     s.confirmation_date,
                     s.partner_id,
-                    s.state_id,
-                    s.city,
                     s.user_id,
                     s.state,
                     s.company_id,
@@ -234,6 +236,8 @@ class SaleReport(models.Model):
                     s.analytic_account_id,
                     s.team_id,
                     p.product_tmpl_id,
+                    partner.city,
+                    partner.state_id,
                     partner.country_id,
                     partner.commercial_partner_id
         """
@@ -256,4 +260,92 @@ class PurchaseOrderLine(models.Model):
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
             })
-            
+'''            
+class PurchaseReport(models.Model):
+    _name = "purchase.report"
+    _inherit = "purchase.report"
+    
+    order_line = fields.One2many('purchase.order.line', 'order_id', string='Order Lines', states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True)
+    name = fields.Text(string='Description', required=True, related='order_line.name')
+    
+    @api.model_cr
+    def init(self):
+        tools.drop_view_if_exists(self._cr, 'purchase_report')
+        self._cr.execute("""
+            create view purchase_report as (
+                WITH currency_rate as (%s)
+                select
+                    min(l.id) as id,
+                    s.date_order as date_order,
+                    s.state,
+                    s.name,
+                    s.date_approve,
+                    s.dest_address_id,
+                    spt.warehouse_id as picking_type_id,
+                    s.partner_id as partner_id,
+                    s.create_uid as user_id,
+                    s.company_id as company_id,
+                    s.fiscal_position_id as fiscal_position_id,
+                    l.product_id,
+                    p.product_tmpl_id,
+                    t.categ_id as category_id,
+                    s.currency_id,
+                    t.uom_id as product_uom,
+                    sum(l.product_qty/u.factor*u2.factor) as unit_quantity,
+                    extract(epoch from age(s.date_approve,s.date_order))/(24*60*60)::decimal(16,2) as delay,
+                    extract(epoch from age(l.date_planned,s.date_order))/(24*60*60)::decimal(16,2) as delay_pass,
+                    count(*) as nbr_lines,
+                    sum(l.price_unit / COALESCE(cr.rate, 1.0) * l.product_qty)::decimal(16,2) as price_total,
+                    avg(100.0 * (l.price_unit / COALESCE(cr.rate,1.0) * l.product_qty) / NULLIF(ip.value_float*l.product_qty/u.factor*u2.factor, 0.0))::decimal(16,2) as negociation,
+                    sum(ip.value_float*l.product_qty/u.factor*u2.factor)::decimal(16,2) as price_standard,
+                    (sum(l.product_qty * l.price_unit / COALESCE(cr.rate, 1.0))/NULLIF(sum(l.product_qty/u.factor*u2.factor),0.0))::decimal(16,2) as price_average,
+                    partner.country_id as country_id,
+                    partner.commercial_partner_id as commercial_partner_id,
+                    analytic_account.id as account_analytic_id,
+                    sum(p.weight * l.product_qty/u.factor*u2.factor) as weight,
+                    sum(p.volume * l.product_qty/u.factor*u2.factor) as volume
+                from purchase_order_line l
+                    join purchase_order s on (l.order_id=s.id)
+                    join res_partner partner on s.partner_id = partner.id
+                        left join product_product p on (l.product_id=p.id)
+                            left join product_template t on (p.product_tmpl_id=t.id)
+                            LEFT JOIN ir_property ip ON (ip.name='standard_price' AND ip.res_id=CONCAT('product.template,',t.id) AND ip.company_id=s.company_id)
+                    left join product_uom u on (u.id=l.product_uom)
+                    left join product_uom u2 on (u2.id=t.uom_id)
+                    left join stock_picking_type spt on (spt.id=s.picking_type_id)
+                    left join account_analytic_account analytic_account on (l.account_analytic_id = analytic_account.id)
+                    left join currency_rate cr on (cr.currency_id = s.currency_id and
+                        cr.company_id = s.company_id and
+                        cr.date_start <= coalesce(s.date_order, now()) and
+                        (cr.date_end is null or cr.date_end > coalesce(s.date_order, now())))
+                group by
+                    s.company_id,
+                    s.create_uid,
+                    s.partner_id,
+                    u.factor,
+                    s.currency_id,
+                    l.price_unit,
+                    s.date_approve,
+                    l.date_planned,
+                    l.product_uom,
+                    s.dest_address_id,
+                    s.fiscal_position_id,
+                    l.product_id,
+                    p.product_tmpl_id,
+                    t.categ_id,
+                    s.date_order,
+                    s.state,
+                    s.name,
+                    spt.warehouse_id,
+                    u.uom_type,
+                    u.category_id,
+                    t.uom_id,
+                    u.id,
+                    u2.factor,
+                    partner.country_id,
+                    partner.commercial_partner_id,
+                    analytic_account.id
+            )
+        """ % self.env['res.currency']._select_companies_rates())
+'''
+    
