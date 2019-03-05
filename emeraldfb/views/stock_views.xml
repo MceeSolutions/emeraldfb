@@ -164,6 +164,9 @@
                     string="Confirm Sale" type="object"
                     attrs="{'invisible': [('state', 'not in', ['draft'])]}" groups="emeraldfb.group_cmo"/>
 	        	</xpath>
+	        	<xpath expr="//button[@name='action_cancel']" position="replace">
+	           		<button name="action_cancel" states="draft,sent,sale" type="object" string="Cancel" groups="emeraldfb.group_cmo"/>
+	        	</xpath>
 	        </field>	
 	   </record>
 	    

@@ -249,6 +249,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = ['purchase.order.line']
     
     discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    name = fields.Text(string='Description', required=True, store=True)
     
     @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
     def _compute_amount(self):
@@ -260,14 +261,49 @@ class PurchaseOrderLine(models.Model):
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
             })
-'''            
+
 class PurchaseReport(models.Model):
     _name = "purchase.report"
-    _inherit = "purchase.report"
+    _description = "Purchases Orders"
+    _auto = False
+    _order = 'date_order desc, price_total desc'
+
+    date_order = fields.Datetime('Order Date', readonly=True, help="Date on which this document has been created", oldname='date')
+    state = fields.Selection([
+        ('draft', 'Draft RFQ'),
+        ('sent', 'RFQ Sent'),
+        ('to approve', 'To Approve'),
+        ('purchase', 'Purchase Order'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')
+        ], 'Order Status', readonly=True)
+    product_id = fields.Many2one('product.product', 'Product', readonly=True)
+    picking_type_id = fields.Many2one('stock.warehouse', 'Warehouse', readonly=True)
+    partner_id = fields.Many2one('res.partner', 'Vendor', readonly=True)
+    date_approve = fields.Date('Date Approved', readonly=True)
+    product_uom = fields.Many2one('product.uom', 'Reference Unit of Measure', required=True)
+    company_id = fields.Many2one('res.company', 'Company', readonly=True)
+    currency_id = fields.Many2one('res.currency', 'Currency', readonly=True)
+    user_id = fields.Many2one('res.users', 'Responsible', readonly=True)
+    delay = fields.Float('Days to Validate', digits=(16, 2), readonly=True)
+    delay_pass = fields.Float('Days to Deliver', digits=(16, 2), readonly=True)
+    unit_quantity = fields.Float('Product Quantity', readonly=True, oldname='quantity')
+    price_total = fields.Float('Total Price', readonly=True)
+    price_average = fields.Float('Average Price', readonly=True, group_operator="avg")
+    negociation = fields.Float('Purchase-Standard Price', readonly=True, group_operator="avg")
+    price_standard = fields.Float('Products Value', readonly=True, group_operator="sum")
+    nbr_lines = fields.Integer('# of Lines', readonly=True, oldname='nbr')
+    category_id = fields.Many2one('product.category', 'Product Category', readonly=True)
+    product_tmpl_id = fields.Many2one('product.template', 'Product Template', readonly=True)
+    country_id = fields.Many2one('res.country', 'Partner Country', readonly=True)
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', oldname='fiscal_position', readonly=True)
+    account_analytic_id = fields.Many2one('account.analytic.account', 'Analytic Account', readonly=True)
+    commercial_partner_id = fields.Many2one('res.partner', 'Commercial Entity', readonly=True)
+    weight = fields.Float('Gross Weight', readonly=True)
+    volume = fields.Float('Volume', readonly=True)
     
-    order_line = fields.One2many('purchase.order.line', 'order_id', string='Order Lines', states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True)
-    name = fields.Text(string='Description', required=True, related='order_line.name')
-    
+    name = fields.Char(string='Product Description', readonly=True)
+
     @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self._cr, 'purchase_report')
@@ -278,7 +314,6 @@ class PurchaseReport(models.Model):
                     min(l.id) as id,
                     s.date_order as date_order,
                     s.state,
-                    s.name,
                     s.date_approve,
                     s.dest_address_id,
                     spt.warehouse_id as picking_type_id,
@@ -287,6 +322,7 @@ class PurchaseReport(models.Model):
                     s.company_id as company_id,
                     s.fiscal_position_id as fiscal_position_id,
                     l.product_id,
+                    l.name as name,
                     p.product_tmpl_id,
                     t.categ_id as category_id,
                     s.currency_id,
@@ -328,6 +364,7 @@ class PurchaseReport(models.Model):
                     s.date_approve,
                     l.date_planned,
                     l.product_uom,
+                    l.name,
                     s.dest_address_id,
                     s.fiscal_position_id,
                     l.product_id,
@@ -335,7 +372,6 @@ class PurchaseReport(models.Model):
                     t.categ_id,
                     s.date_order,
                     s.state,
-                    s.name,
                     spt.warehouse_id,
                     u.uom_type,
                     u.category_id,
@@ -347,5 +383,3 @@ class PurchaseReport(models.Model):
                     analytic_account.id
             )
         """ % self.env['res.currency']._select_companies_rates())
-'''
-    
