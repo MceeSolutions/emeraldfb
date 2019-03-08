@@ -314,6 +314,8 @@ class Employee(models.Model):
     guarantor2_address = fields.Char(string='Address')
     guarantor2_phone = fields.Char(string='Phone Number')
     
+    work_identification_number = fields.Char(string='Work Identification Number')
+    
     @api.multi
     def send_birthday_reminder_mail(self):
 
@@ -351,7 +353,20 @@ class Employee(models.Model):
                                 mail.send()
                             return True
         return
+
+class Contract(models.Model):
+    _inherit = 'hr.contract'
     
+    address_home_id = fields.Many2one(
+        'res.partner', 'Private Address', help='Enter here the private address of the employee, not the one linked to your company.',
+        groups="hr.group_hr_user")
+    
+    bank_account_id = fields.Many2one(
+        'res.partner.bank', 'Bank Account Number',
+        groups="hr.group_hr_user",
+        related="employee_id.bank_account_id",
+        help='Employee bank salary account')
+
 class HrPayslipWorkedDays(models.Model):
     _inherit = 'hr.payslip.worked_days'
     
