@@ -10,10 +10,10 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
 			<field name="address_home_id" position="replace">
-				<field name="address_home_id" context="{'show_address': 1}" options='{"always_reload": True, "highlight_first_line": True}' invisible="1"/>
+				<field name="address_home_id" context="{'show_address': 1}" options='{"always_reload": True, "highlight_first_line": True}'/>
 			</field>
 			<field name="address_home_id" position="after">
-				<field name="address_home"/>
+				<field name="address_home" invisible="1"/>
 			</field>
 			<xpath expr="//page[@name='personal_information']" position="inside">
 				<group string="Next of Kin" col="2">
@@ -34,6 +34,24 @@
 			</xpath>
 			<field name="work_phone" position="after">
 					<field name="highest_level_of_education"/>
+					<field name="work_identification_number"/>
+			</field>
+			<field name="bank_account_id" position="replace">
+					<field name="bank_account_id" context="{'default_partner_id': address_home_id}" invisible="1"/>
+			</field>
+		</field>
+	</record>
+	
+	<!-- Employee Contract Form -->
+	<record id="emeraldfb_hr_contract_view_form" model="ir.ui.view">
+		<field name="name">hr.contract.form</field>
+        <field name="model">hr.contract</field>
+        <field name="priority" eval="7" />
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+			<field name="type_id" position="after">
+					<field name="bank_account_id"/>
+					<field name="address_home_id" context="{'show_address': 1}" options='{"always_reload": True, "highlight_first_line": True}' invisible="1"/>
 			</field>
 		</field>
 	</record>
