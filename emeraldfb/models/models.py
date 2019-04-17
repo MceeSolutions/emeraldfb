@@ -97,6 +97,10 @@ class Holidays(models.Model):
     _name = "hr.holidays"
     _inherit = 'hr.holidays'
     
+    date_from = fields.Date('Start Date', readonly=True, index=True, copy=False,
+        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
+    date_to = fields.Date('End Date', readonly=True, copy=False,
+        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
     
     @api.multi
     def send_hr_approved_mail(self):
@@ -315,6 +319,9 @@ class Employee(models.Model):
     guarantor2_phone = fields.Char(string='Phone Number')
     
     work_identification_number = fields.Char(string='Work Identification Number')
+    
+    state_id = fields.Many2one(comodel_name='res.country.state', string='State')
+    local_government_area = fields.Char(string='Local Government Area')
     
     @api.multi
     def send_birthday_reminder_mail(self):

@@ -2,7 +2,7 @@
 import datetime
 
 from datetime import date, timedelta
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 from odoo.addons import decimal_precision as dp
 
@@ -52,6 +52,62 @@ class Picking(models.Model):
         self.write({'state': 'draft'})
         return {}
     
+    @api.multi
+    def button_return_backorder(self):
+        # Check backorder should check for other barcodes
+        if self._check_backorder():
+            return self.action_generate_backorder_wizard()
+        self.action_done()
+        return
+
+    def action_generate_backorder_wizard(self):
+        view = self.env.ref('stock.view_backorder_confirmation')
+        wiz = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, p.id) for p in self]})
+        return {
+            'name': _('Create Backorder?'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.backorder.confirmation',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': wiz.id,
+            'context': self.env.context,
+        }
+
+    def action_toggle_is_locked(self):
+        self.ensure_one()
+        self.is_locked = not self.is_locked
+        return True
+
+    def _check_backorder(self):
+        """ This method will loop over all the move lines of self and
+        check if creating a backorder is necessary. This method is
+        called during button_validate if the user has already processed
+        some quantities and in the immediate transfer wizard that is
+        displayed if the user has not processed any quantities.
+
+        :return: True if a backorder is necessary else False
+        """
+        quantity_todo = {}
+        quantity_done = {}
+        for move in self.mapped('move_lines'):
+            quantity_todo.setdefault(move.product_id.id, 0)
+            quantity_done.setdefault(move.product_id.id, 0)
+            quantity_todo[move.product_id.id] += move.product_uom_qty
+            quantity_done[move.product_id.id] += move.quantity_done
+        for ops in self.mapped('move_line_ids').filtered(lambda x: x.package_id and not x.product_id and not x.move_id):
+            for quant in ops.package_id.quant_ids:
+                quantity_done.setdefault(quant.product_id.id, 0)
+                quantity_done[quant.product_id.id] += quant.qty
+        for pack in self.mapped('move_line_ids').filtered(lambda x: x.product_id and not x.move_id):
+            quantity_done.setdefault(pack.product_id.id, 0)
+            quantity_done[pack.product_id.id] += pack.qty_done
+        return any(quantity_done[x] < quantity_todo.get(x, 0) for x in quantity_done)
+    
+    
+    
     '''
     @api.model
     def create(self, vals):
@@ -85,6 +141,12 @@ class Picking(models.Model):
                 partner_ids.append(partner.id)
             self.sheet_id.message_post(subject=subject,body=subject,partner_ids=partner_ids)
     '''
+
+class ReturnPicking(models.TransientModel):
+    _name = 'stock.return.picking'
+    _inherit = 'stock.return.picking'
+    
+    
             
 class HrExpense(models.Model):
 
@@ -95,6 +157,8 @@ class HrExpense(models.Model):
     
     account_id = fields.Many2one('account.account', string='Account', states={'post': [('readonly', True)], 'done': [('readonly', True)], 'approve': [('readonly', False)]}, default=lambda self: self.env['ir.property'].get('property_account_expense_categ_id', 'product.category'),
         help="An expense account is expected")
+    
+    discount = fields.Float(string='Discount')
     
     @api.multi
     def approve_employee_expense_sheets_notification(self):
