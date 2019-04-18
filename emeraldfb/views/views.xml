@@ -14,6 +14,8 @@
 			</field>
 			<field name="address_home_id" position="after">
 				<field name="address_home" invisible="1"/>
+				<field name="state_id"/>
+				<field name="local_government_area"/>
 			</field>
 			<xpath expr="//page[@name='personal_information']" position="inside">
 				<group string="Next of Kin" col="2">

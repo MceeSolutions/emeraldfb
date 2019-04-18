@@ -2,13 +2,63 @@
 import datetime
 
 from datetime import date, timedelta
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 from odoo.addons import decimal_precision as dp
 
 class Picking(models.Model):
     _name = "stock.picking"
     _inherit = 'stock.picking'
+    
+    @api.multi
+    def action_dones(self):
+        """Changes picking state to done by processing the Stock Moves of the Picking
+
+        Normally that happens when the button "Done" is pressed on a Picking view.
+        @return: True
+        """
+        # TDE FIXME: remove decorator when migration the remaining
+        todo_moves = self.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
+        # Check if there are ops not linked to moves yet
+        for pick in self:
+            # # Explode manually added packages
+            # for ops in pick.move_line_ids.filtered(lambda x: not x.move_id and not x.product_id):
+            #     for quant in ops.package_id.quant_ids: #Or use get_content for multiple levels
+            #         self.move_line_ids.create({'product_id': quant.product_id.id,
+            #                                    'package_id': quant.package_id.id,
+            #                                    'result_package_id': ops.result_package_id,
+            #                                    'lot_id': quant.lot_id.id,
+            #                                    'owner_id': quant.owner_id.id,
+            #                                    'product_uom_id': quant.product_id.uom_id.id,
+            #                                    'product_qty': quant.qty,
+            #                                    'qty_done': quant.qty,
+            #                                    'location_id': quant.location_id.id, # Could be ops too
+            #                                    'location_dest_id': ops.location_dest_id.id,
+            #                                    'picking_id': pick.id
+            #                                    }) # Might change first element
+            # # Link existing moves or add moves when no one is related
+            for ops in pick.move_line_ids.filtered(lambda x: not x.move_id):
+                # Search move with this product
+                moves = pick.move_lines.filtered(lambda x: x.product_id == ops.product_id) 
+                if moves: #could search move that needs it the most (that has some quantities left)
+                    ops.move_id = moves[0].id
+                else:
+                    new_move = self.env['stock.move'].create({
+                                                    'name': _('New Move:') + ops.product_id.display_name,
+                                                    'product_id': ops.product_id.id,
+                                                    'product_uom_qty': ops.quantity,
+                                                    'product_uom': ops.product_uom_id.id,
+                                                    'location_id': pick.location_id.id,
+                                                    'location_dest_id': pick.location_dest_id.id,
+                                                    'picking_id': pick.id,
+                                                   })
+                    ops.move_id = new_move.id
+                    new_move._action_confirm()
+                    todo_moves |= new_move
+                    #'qty_done': ops.qty_done})
+        todo_moves._action_done()
+        self.write({'date_done': fields.Datetime.now()})
+        return True
     
     def _default_employee(self):
         self.env['hr.employee'].search([('user_id','=',self.env.uid)])
@@ -51,7 +101,7 @@ class Picking(models.Model):
         self.mapped('move_lines')._action_cancel()
         self.write({'state': 'draft'})
         return {}
-    
+
     '''
     @api.model
     def create(self, vals):
@@ -85,7 +135,42 @@ class Picking(models.Model):
                 partner_ids.append(partner.id)
             self.sheet_id.message_post(subject=subject,body=subject,partner_ids=partner_ids)
     '''
-            
+
+class ReturnPicking(models.TransientModel):
+    _name = 'stock.return.picking'
+    _inherit = 'stock.return.picking'
+    
+    #pick_ids = fields.Many2many('stock.picking', 'stock_return_picking_rel')
+    
+    def create_returns(self):
+        for wizard in self:
+            new_picking_id, pick_type_id = wizard._create_returns()
+        # Override the context to disable all the potential filters that could have been set previously
+        ctx = dict(self.env.context)
+        ctx.update({
+            'search_default_picking_type_id': pick_type_id,
+            'search_default_draft': False,
+            'search_default_assigned': False,
+            'search_default_confirmed': False,
+            'search_default_ready': False,
+            'search_default_late': False,
+            'search_default_available': False,
+        })
+        view = self.env.ref('stock.view_backorder_confirmation')
+        wiz = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, p.id) for p in self]})
+        return {
+            'name': _('Create Backorder?'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.backorder.confirmation',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': wiz.id,
+            'context': self.env.context,
+        }
+   
 class HrExpense(models.Model):
 
     _name = "hr.expense"
@@ -95,6 +180,8 @@ class HrExpense(models.Model):
     
     account_id = fields.Many2one('account.account', string='Account', states={'post': [('readonly', True)], 'done': [('readonly', True)], 'approve': [('readonly', False)]}, default=lambda self: self.env['ir.property'].get('property_account_expense_categ_id', 'product.category'),
         help="An expense account is expected")
+    
+    discount = fields.Float(string='Discount')
     
     @api.multi
     def approve_employee_expense_sheets_notification(self):
@@ -248,13 +335,13 @@ class PurchaseOrderLine(models.Model):
     _name = "purchase.order.line"
     _inherit = ['purchase.order.line']
     
-    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    discount = fields.Float(string='Discount', digits=dp.get_precision('Discount'), default=0.0)
     name = fields.Text(string='Description', required=True, store=True)
     
     @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
     def _compute_amount(self):
         for line in self:
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price = line.price_unit  - (line.discount or 0.0)
             taxes = line.taxes_id.compute_all(price, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             line.update({
                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),

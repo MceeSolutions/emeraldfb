@@ -182,6 +182,9 @@
 	            <field name="account_id" position="replace">
 	                <field name="account_id" domain="[('internal_type', '=', 'other')]" groups="account.group_account_user"/>
 	            </field>
+	            <field name="tax_ids" position="before">
+	                <field name="discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+	            </field>
 	        </field>
 	 </record>
 	    
@@ -229,7 +232,6 @@
 	            </xpath>
 	        </field>
 	    </record>
-	    
 	    
    		<record model="ir.actions.act_window" id="store_req_action1_window">
 	      <field name="name">Store Request</field>
