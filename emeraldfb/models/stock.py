@@ -140,10 +140,9 @@ class ReturnPicking(models.TransientModel):
     _name = 'stock.return.picking'
     _inherit = 'stock.return.picking'
     
-    pick_ids = fields.Many2many('stock.picking', 'stock_return_picking_rel')
+    #pick_ids = fields.Many2many('stock.picking', 'stock_return_picking_rel')
     
     def create_returns(self):
-        cancel_backorder = False
         for wizard in self:
             new_picking_id, pick_type_id = wizard._create_returns()
         # Override the context to disable all the potential filters that could have been set previously
@@ -157,24 +156,21 @@ class ReturnPicking(models.TransientModel):
             'search_default_late': False,
             'search_default_available': False,
         })
-        
-        self.pick_ids.action_dones()
-        if cancel_backorder:
-            for pick_id in self.pick_ids:
-                backorder_pick = self.env['stock.picking'].search([('backorder_id', '=', pick_id.id)])
-                backorder_pick.action_cancel()
-                pick_id.message_post(body=_("Back order <em>%s</em> <b>cancelled</b>.") % (backorder_pick.name))
-                
+        view = self.env.ref('stock.view_backorder_confirmation')
+        wiz = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, p.id) for p in self]})
         return {
-            'name': _('Returned Picking'),
-            'view_type': 'form',
-            'view_mode': 'form,tree,calendar',
-            'res_model': 'stock.picking',
-            'res_id': new_picking_id,
+            'name': _('Create Backorder?'),
             'type': 'ir.actions.act_window',
-            'context': ctx,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.backorder.confirmation',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': wiz.id,
+            'context': self.env.context,
         }
-            
+   
 class HrExpense(models.Model):
 
     _name = "hr.expense"
