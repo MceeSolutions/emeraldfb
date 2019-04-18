@@ -233,18 +233,6 @@
 	        </field>
 	    </record>
 	    
-	    <record id="emeraldfb_stock_picking_form_view" model="ir.ui.view">
-	        <field name="name">emeraldfb.stock.picking</field>
-	        <field name="model">stock.picking</field>
-	        <field name="inherit_id" ref="stock.view_picking_form"/>
-	        <field name="arch" type="xml">
-	        	<xpath expr="//button[@name='button_validate']" position="after">
-	        		<button name="button_return_backorder" string="Test" type="object" groups="base.group_user"/>
-	        	</xpath>
-	        </field>
-	    </record>
-	    
-	    
    		<record model="ir.actions.act_window" id="store_req_action1_window">
 	      <field name="name">Store Request</field>
 	      <field name="res_model">stock.picking</field>

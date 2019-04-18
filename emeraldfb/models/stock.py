@@ -51,63 +51,7 @@ class Picking(models.Model):
         self.mapped('move_lines')._action_cancel()
         self.write({'state': 'draft'})
         return {}
-    
-    @api.multi
-    def button_return_backorder(self):
-        # Check backorder should check for other barcodes
-        if self._check_backorder():
-            return self.action_generate_backorder_wizard()
-        self.action_done()
-        return
 
-    def action_generate_backorder_wizard(self):
-        view = self.env.ref('stock.view_backorder_confirmation')
-        wiz = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, p.id) for p in self]})
-        return {
-            'name': _('Create Backorder?'),
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'stock.backorder.confirmation',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
-            'target': 'new',
-            'res_id': wiz.id,
-            'context': self.env.context,
-        }
-
-    def action_toggle_is_locked(self):
-        self.ensure_one()
-        self.is_locked = not self.is_locked
-        return True
-
-    def _check_backorder(self):
-        """ This method will loop over all the move lines of self and
-        check if creating a backorder is necessary. This method is
-        called during button_validate if the user has already processed
-        some quantities and in the immediate transfer wizard that is
-        displayed if the user has not processed any quantities.
-
-        :return: True if a backorder is necessary else False
-        """
-        quantity_todo = {}
-        quantity_done = {}
-        for move in self.mapped('move_lines'):
-            quantity_todo.setdefault(move.product_id.id, 0)
-            quantity_done.setdefault(move.product_id.id, 0)
-            quantity_todo[move.product_id.id] += move.product_uom_qty
-            quantity_done[move.product_id.id] += move.quantity_done
-        for ops in self.mapped('move_line_ids').filtered(lambda x: x.package_id and not x.product_id and not x.move_id):
-            for quant in ops.package_id.quant_ids:
-                quantity_done.setdefault(quant.product_id.id, 0)
-                quantity_done[quant.product_id.id] += quant.qty
-        for pack in self.mapped('move_line_ids').filtered(lambda x: x.product_id and not x.move_id):
-            quantity_done.setdefault(pack.product_id.id, 0)
-            quantity_done[pack.product_id.id] += pack.qty_done
-        return any(quantity_done[x] < quantity_todo.get(x, 0) for x in quantity_done)
-    
-    
-    
     '''
     @api.model
     def create(self, vals):
@@ -145,8 +89,30 @@ class Picking(models.Model):
 class ReturnPicking(models.TransientModel):
     _name = 'stock.return.picking'
     _inherit = 'stock.return.picking'
-    
-    
+
+    def create_returns(self):
+        for wizard in self:
+            new_picking_id, pick_type_id = wizard._create_returns()
+        # Override the context to disable all the potential filters that could have been set previously
+        ctx = dict(self.env.context)
+        ctx.update({
+            'search_default_picking_type_id': pick_type_id,
+            'search_default_draft': False,
+            'search_default_assigned': False,
+            'search_default_confirmed': False,
+            'search_default_ready': False,
+            'search_default_late': False,
+            'search_default_available': False,
+        })
+        return {
+            'name': _('Returned Picking'),
+            'view_type': 'form',
+            'view_mode': 'form,tree,calendar',
+            'res_model': 'stock.picking',
+            'res_id': new_picking_id,
+            'type': 'ir.actions.act_window',
+            'context': ctx,
+        }
             
 class HrExpense(models.Model):
 
@@ -312,13 +278,13 @@ class PurchaseOrderLine(models.Model):
     _name = "purchase.order.line"
     _inherit = ['purchase.order.line']
     
-    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    discount = fields.Float(string='Discount', digits=dp.get_precision('Discount'), default=0.0)
     name = fields.Text(string='Description', required=True, store=True)
     
     @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
     def _compute_amount(self):
         for line in self:
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price = line.price_unit  - line.discount
             taxes = line.taxes_id.compute_all(price, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             line.update({
                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
