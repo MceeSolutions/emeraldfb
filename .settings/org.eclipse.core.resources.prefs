@@ -3,3 +3,7 @@ encoding//emeraldfb/__init__.py=utf-8
 encoding//emeraldfb/__manifest__.py=utf-8
 encoding//emeraldfb/models/__init__.py=utf-8
 encoding//emeraldfb/models/stock.py=utf-8
+encoding//netcom_hr_payroll/models/hr_payslip.py=utf-8
+encoding//netcom_hr_payroll/models/pfa.py=utf-8
+encoding//netcom_hr_payroll/report/report_payslip_details.py=utf-8
+encoding//netcom_hr_payroll/wizard/payroll_register.py=utf-8

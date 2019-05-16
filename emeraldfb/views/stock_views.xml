@@ -221,6 +221,17 @@
 	            </xpath>
 	        </field>
 	 	</record>
+	 	
+	 	<record id="emerald_view_account_payment_invoice_form" model="ir.ui.view">
+            <field name="name">emeraldfb.account.payment.invoice.form</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+            <field name="arch" type="xml">
+            	<field name="communication" position="after">
+	                <field name="user_id"/>
+	            </field>
+	        </field>
+	 	</record>
 	    
 	    <record id="emeraldfb_purchase_form_view" model="ir.ui.view">
 	        <field name="name">emeraldfb.purchase.form</field>
