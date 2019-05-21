@@ -255,6 +255,23 @@ class HrExpenseSheet(models.Model):
         
         self.write({'state': 'approve', 'responsible_id': self.env.user.id})
 
+class SaleOrderLine(models.Model):
+    _name = 'sale.order.line'
+    _description = 'Sales Order Line'
+    _inherit = ['sale.order.line']
+    
+    type = fields.Selection([('sale', 'Sale'), ('transport_rebate', 'Transport Rebate'), ('monthly_rebate', 'Monthly Rebate'), ('pr', 'PR')], string='Type', required=True,default='sale')            
+    
+    
+    @api.multi
+    @api.onchange('type')
+    def type_change(self):
+        if self.type == 'sale':
+            self.discount = 0
+        else:
+            self.discount = 100
+            
+            
 class account_payment(models.Model):
     _name = "account.payment"
     _inherit = "account.payment"    
