@@ -260,7 +260,7 @@ class SaleOrderLine(models.Model):
     _description = 'Sales Order Line'
     _inherit = ['sale.order.line']
     
-    type = fields.Selection([('sale', 'Sale'), ('transport_rebate', 'Transport Rebate'), ('monthly_rebate', 'Monthly Rebate'), ('pr', 'PR')], string='Type', required=True,default='sale')            
+    type = fields.Selection([('sale', 'Sale'), ('transport_rebate', 'Transport Rebate'), ('monthly_rebate', 'Monthly Rebate'), ('pr', 'PR')], string='Type', required=True, default='sale', store=True)            
     
     
     @api.multi
@@ -290,12 +290,14 @@ class SaleReport(models.Model):
     
     state_id = fields.Many2one(comodel_name="res.country.state", string='State', readonly=True)
     city = fields.Char(string='City', readonly=True)
+    type = fields.Selection([('sale', 'Sale'), ('transport_rebate', 'Transport Rebate'), ('monthly_rebate', 'Monthly Rebate'), ('pr', 'PR')], string='Type', readonly=True)            
     
     def _select(self):
         select_str = """
             WITH currency_rate as (%s)
              SELECT min(l.id) as id,
                     l.product_id as product_id,
+                    l.type as type,
                     t.uom_id as product_uom,
                     sum(l.product_uom_qty / u.factor * u2.factor) as product_uom_qty,
                     sum(l.qty_delivered / u.factor * u2.factor) as qty_delivered,
@@ -332,6 +334,7 @@ class SaleReport(models.Model):
         group_by_str = """
             GROUP BY l.product_id,
                     l.order_id,
+                    l.type,
                     t.uom_id,
                     t.categ_id,
                     s.name,
