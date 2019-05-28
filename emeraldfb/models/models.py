@@ -373,7 +373,10 @@ class Contract(models.Model):
         groups="hr.group_hr_user",
         related="employee_id.bank_account_id",
         help='Employee bank salary account')
-
+    
+    overtime = fields.Monetary('Overtime', digits=(16, 2), required=True, help="Employee's Overtime")
+    deductions = fields.Monetary('Deductions', digits=(16, 2), required=True, help="Employee's Deductions")
+    
 class HrPayslipWorkedDays(models.Model):
     _inherit = 'hr.payslip.worked_days'
     
