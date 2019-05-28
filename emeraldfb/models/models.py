@@ -377,6 +377,13 @@ class Contract(models.Model):
     overtime = fields.Float(string='Overtime', required=False, help="Employee's Overtime")
     deductions = fields.Float(string='Deductions', required=False, help="Employee's Deductions")
     
+class HrPayslip(models.Model):
+    _name = 'hr.payslip'
+    _inherit = 'hr.payslip'
+    
+    overtime = fields.Float(string='Overtime', required=False, help="Employee's Overtime")
+    deductions = fields.Float(string='Deductions', required=False, help="Employee's Deductions")
+    
 class HrPayslipWorkedDays(models.Model):
     _inherit = 'hr.payslip.worked_days'
     
