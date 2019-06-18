@@ -281,6 +281,12 @@ class account_payment(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
     
+    @api.multi
+    def _default_employee(self):
+         return self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
+    
+    sale_employee_id = fields.Many2one(comodel_name='hr.employee', string='Employee', default=_default_employee, help="Default Employee")
+    
     state_id = fields.Many2one(comodel_name="res.country.state", string='State', ondelete='restrict', readonly=True, index=True, store=True)
     city = fields.Char(string='City', readonly=True, index=True, store=True)
     
