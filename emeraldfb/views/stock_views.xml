@@ -153,7 +153,7 @@
             </field>
         </record>
         
-        <!-- sale order confirmation button restricted to cmo -->
+        <!-- sale order confirmation button restricted to cmo
 		<record id="emeraldfb_sale_order_form_view" model="ir.ui.view">
 	        <field name="name">emeraldfb.sale.order.form</field>
 	        <field name="model">sale.order</field>
@@ -169,7 +169,8 @@
 	        	</xpath>
 	        </field>	
 	   </record>
-	    
+	    -->
+	     
 		<record id="emeraldfb_sale_order_line_form_view" model="ir.ui.view">
             <field name="name">sale.order.lineform</field>
             <field name="model">sale.order</field>
