@@ -361,6 +361,13 @@ class SaleReport(models.Model):
         """
         return group_by_str
     
+
+class PurchaseOrder(models.Model):
+    _name = "purchase.order"
+    _inherit = "purchase.order"
+    
+    employee_id = fields.Many2one(comodel_name = 'hr.employee', string ='Employee', required=False)
+    department_id = fields.Many2one(comodel_name = 'hr.department', string ='Employee Department', related="employee_id.department_id", readonly=True, required=False)
     
 class PurchaseOrderLine(models.Model):
     _name = "purchase.order.line"
