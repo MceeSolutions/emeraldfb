@@ -183,6 +183,13 @@ class HrExpense(models.Model):
     
     discount = fields.Float(string='Discount')
     
+    @api.depends('quantity', 'unit_amount', 'discount', 'tax_ids', 'currency_id')
+    def _compute_amount(self):
+        for expense in self:
+            expense.untaxed_amount = expense.unit_amount * expense.quantity - expense.discount
+            taxes = expense.tax_ids.compute_all(expense.unit_amount, expense.currency_id, expense.quantity, expense.product_id, expense.employee_id.user_id.partner_id)
+            expense.total_amount = taxes.get('total_included') - expense.discount
+    
     @api.multi
     def approve_employee_expense_sheets_notification(self):
         group_id = self.env['ir.model.data'].xmlid_to_object('emeraldfb.group_coo')
