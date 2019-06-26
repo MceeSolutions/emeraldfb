@@ -235,7 +235,7 @@ class Partner(models.Model):
 
     payment_term_id = fields.Many2one(comodel_name = 'account.payment.term', string ='Payment Terms')
     
-    client_birthday = fields.Date(string= 'Cleint Birthday Date')
+    client_birthday = fields.Date(string= 'Client Birthday Date')
     
     
 class CustomerRequest(models.Model):
