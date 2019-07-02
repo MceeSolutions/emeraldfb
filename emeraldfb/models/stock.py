@@ -396,10 +396,10 @@ class PurchaseOrderLine(models.Model):
 
 class HrSalaryRule(models.Model):
     _inherit = 'hr.salary.rule'
-    _order = 'sequence asc'
+    _order = 'arrangement_sequence asc'
     
-    sequence = fields.Integer(required=True, index=True, default=5,
-        help='Use to arrange calculation sequence')
+    arrangement_sequence = fields.Integer(required=False, index=True, default=5,
+        help='Use to arrange sequence')
 
 class PurchaseReport(models.Model):
     _name = "purchase.report"
