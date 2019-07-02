@@ -63,13 +63,6 @@
                                         <span t-esc="r"></span>
                                    </th>
                                 </t>
-                                <th>Department</th>
-                                <t t-value="docs.get_periods(data['form'])" t-set="rules" />
-                                <t t-foreach="rules[0]" t-as="r" >
-                                    <th>
-                                        <span t-esc="r"></span>
-                                   </th>
-                                </t>
                                 <t t-if="len(rules[0])&lt;9">
                                     <th t-foreach="range(9-len(rules[0]))" t-as="a">
                                         <span></span>

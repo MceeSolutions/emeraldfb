@@ -256,6 +256,17 @@
 	            </field>
 	        </field>
 	 	</record>
+	 	
+	 	<record id="emerald_hr_salary_rule_form" model="ir.ui.view">
+            <field name="name">emeraldfb.hr.salary.rule.form</field>
+            <field name="model">hr.salary.rule</field>
+            <field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>
+            <field name="arch" type="xml">
+            	<field name="appears_on_payslip" position="after">
+	                <field name="arrangement_sequence"/>
+	            </field>
+	        </field>
+	 	</record>
 	    
 	    <record id="emeraldfb_purchase_form_view" model="ir.ui.view">
 	        <field name="name">emeraldfb.purchase.form</field>
