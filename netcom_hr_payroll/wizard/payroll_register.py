@@ -207,10 +207,14 @@ class payroll_reg(models.TransientModel):
             row = self.render_header(sheet, comp_list, first_row=5)
             emp_datas = self.get_employee(datas['form'], excel=True)
             print("employee datas", emp_datas)
+            _logger.info('employee datas: %s' %(emp_datas))
             
             emp_ids = datas['form']['employee_ids']
             employee_obj = self.env['hr.employee']
             employees = employee_obj.browse(emp_ids)
+            _logger.info('employee: %s' %(employees))
+            _logger.info('employee obj: %s' %(employee_obj))
+            _logger.info('employee ids: %s' %(emp_ids))
             print("employee", employees)
             print("employee obj", employee_obj)
             print("employee ids", emp_ids)
