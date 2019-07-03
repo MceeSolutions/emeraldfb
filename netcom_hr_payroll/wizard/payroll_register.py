@@ -207,14 +207,13 @@ class payroll_reg(models.TransientModel):
             row = self.render_header(sheet, comp_list, first_row=5)
             emp_datas = self.get_employee(datas['form'], excel=True)
             print("employee datas", emp_datas)
-            print("employee obj", employee_obj)
-            print("employee ids", emp_ids)
-            
             
             emp_ids = datas['form']['employee_ids']
             employee_obj = self.env['hr.employee']
             employees = employee_obj.browse(emp_ids)
             print("employee", employees)
+            print("employee obj", employee_obj)
+            print("employee ids", emp_ids)
             
             # Search for the Pension Field
             inds = []               
