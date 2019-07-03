@@ -220,8 +220,9 @@ class payroll_reg(models.TransientModel):
             
             if inds :                    
                 for emp_data in emp_datas :
-                    print(emp_data)
+                    print(’The value of emp_data is’,emp_data)
                     emp_ids = employee_obj.search([('name','=',emp_data[0])])
+                    print(’The value of emp_ids is’,emp_ids)
                     pen_comp = emp_ids[0].pf_id.name
                     _logger.info('Emp data %s: %s'%(emp_data[0], pen_comp))
                     thevalue = emp_data[inds[0]]
@@ -255,6 +256,7 @@ class payroll_reg(models.TransientModel):
             value_style = xlwt.easyxf('font: name Helvetica', num_format_str = '#,##0.00')
             cell_count = 0
             for value in emp_datas:
+                print(’The value of emp_data is’,value)
                 for v in value:
                     sheet.write(row,cell_count,v,value_style)
                     cell_count += 1
