@@ -210,6 +210,7 @@ class payroll_reg(models.TransientModel):
             emp_ids = datas['form']['employee_ids']
             employee_obj = self.env['hr.employee']
             employees = employee_obj.browse(emp_ids)
+            print("employee", employees)
             
             # Search for the Pension Field
             inds = []               
