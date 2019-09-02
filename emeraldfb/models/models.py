@@ -305,7 +305,7 @@ class CustomerRequest(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
     
-    online_website_price = fields.Float('Online price')
+    online_website_price = fields.Float('Online price', related='website_price', readonly=False)
 
 class Employee(models.Model):
     _inherit = 'hr.employee'
