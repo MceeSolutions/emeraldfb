@@ -301,7 +301,12 @@ class CustomerRequest(models.Model):
     def button_reject(self):
         self.write({'state': 'reject'})
         return {}
+
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
     
+    online_website_price = fields.Float('Online price')
+
 class Employee(models.Model):
     _inherit = 'hr.employee'
     
