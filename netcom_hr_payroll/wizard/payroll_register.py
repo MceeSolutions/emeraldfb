@@ -139,12 +139,14 @@ class payroll_reg(models.TransientModel):
         employees  = emp_obj.browse(emp_ids)
         for emp_id in employees:
             emp_salary.append(emp_id.name)
+            emp_salary.append(emp_id.department_id.name)
+            emp_salary.append(emp_id.bank_account_id.acc_number)
             total = 0.0
             if excel:
                 emp_salary, total, total_mnths = self.get_salary1(form, emp_id.id, emp_salary, total_mnths=total_excel_months)
             else:
                 emp_salary, total, total_mnths = self.get_salary(form, emp_id.id, emp_salary, total_mnths)
-            emp_salary.append(total)
+            #emp_salary.append(total)
             salary_list.append(emp_salary)
             emp_salary = []
         self.mnths_total = total_mnths
@@ -199,10 +201,10 @@ class payroll_reg(models.TransientModel):
             
             pfa_dict = dict(zip(pfa_list,zip_pfa_list))
             
-            bf_pfa_list = ['Name'] + main_header[0]
+            bf_pfa_list = ['Name','Department','Bank Account Number'] + main_header[0]
             count_bf_pfa_list = len(bf_pfa_list)            
-            af_pfa_list = ['Total']            
-            comp_list = bf_pfa_list +  af_pfa_list + pfa_list
+            #af_pfa_list = ['Total']
+            comp_list = bf_pfa_list + pfa_list
             
             row = self.render_header(sheet, comp_list, first_row=5)
             emp_datas = self.get_employee(datas['form'], excel=True)
@@ -255,23 +257,24 @@ class payroll_reg(models.TransientModel):
             cell_count = 0
             for value in emp_datas:
                 for v in value:
+                    print(v)
                     sheet.write(row,cell_count,v,value_style)
                     cell_count += 1
                 row += 1
                 cell_count = 0
-            sheet.write(row+1, 0, 'Total',value_style)
+            #sheet.write(row+1, 0, 'Total',value_style)
             total_datas = self.get_months_tol()
             
             cell_count = 1
             for value in [total_datas]:
                 row += 1
                 for v in value[1:]:
-                    sheet.write(row,cell_count,v,value_style)
+                    #sheet.write(row,cell_count,v,value_style)
                     cell_count += 1
                 # cell_count = 0
 
             total = self.get_total()
-            sheet.write(row,cell_count,total,value_style)
+            #sheet.write(row,cell_count,total,value_style)
             cell_count = 0
 
             col = 0
@@ -281,7 +284,7 @@ class payroll_reg(models.TransientModel):
                     if pfa == ele:
                         pfa_total = pfa_dict.get(pfa)
                         col = i
-                        sheet.write(row,col,pfa_total,value_style)
+            #sheet.write(row,col,pfa_total,value_style)
             row += 1
             
             stream = BytesIO()
