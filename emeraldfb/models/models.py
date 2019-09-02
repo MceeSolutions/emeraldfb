@@ -302,8 +302,8 @@ class CustomerRequest(models.Model):
         self.write({'state': 'reject'})
         return {}
 
-class ProductTemplate(models.Model):
-    _inherit = 'product.template'
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
     
     online_website_price = fields.Float('Online price', related='website_price', readonly=False)
 
