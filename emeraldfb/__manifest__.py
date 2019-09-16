@@ -16,7 +16,7 @@
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
     'category': 'emeraldfb',
-    'version': '0.44',
+    'version': '0.47',
 
 
     # any module necessary for this one to work correctly
@@ -29,6 +29,7 @@
         'data/data.xml',
         'views/views.xml',
         'views/stock_views.xml',
+        'views/website_sale_templates.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
