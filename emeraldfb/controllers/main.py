@@ -14,3 +14,7 @@ class Payments(http.Controller):
     @http.route('/shop/payment_failed', type='http', auth='public', methods=['POST'], website=True, csrf=False)
     def show_payment_failed_webpage(self, **kw):
         return http.request.render('emeraldfb.payment_failed', {})
+    
+    @http.route('/shop/payment_cancelled', type='http', auth='public', methods=['POST'], website=True, csrf=False)
+    def show_payment_failed_webpage(self, **kw):
+        return http.request.render('emeraldfb.payment_cancelled', {})
