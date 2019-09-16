@@ -1,6 +1,8 @@
 eclipse.preferences.version=1
 encoding//emeraldfb/__init__.py=utf-8
 encoding//emeraldfb/__manifest__.py=utf-8
+encoding//emeraldfb/controllers/__init__.py=utf-8
+encoding//emeraldfb/controllers/main.py=utf-8
 encoding//emeraldfb/models/__init__.py=utf-8
 encoding//emeraldfb/models/stock.py=utf-8
 encoding//netcom_hr_payroll/models/hr_payslip.py=utf-8

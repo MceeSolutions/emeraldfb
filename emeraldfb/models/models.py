@@ -1,6 +1,10 @@
 # -*-coding:utf-8-*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.addons import decimal_precision as dp
 
+from odoo.tools import pycompat
+from odoo.tools.translate import html_translate
+from odoo.tools import float_is_zero
 
 class TrainingTracker(models.Model):
     _name = 'emeraldfb.training.tracker'
@@ -302,10 +306,32 @@ class CustomerRequest(models.Model):
         self.write({'state': 'reject'})
         return {}
 
-class ProductProduct(models.Model):
-    _inherit = 'product.product'
-    
+class Product(models.Model):
+    _inherit = "product.product"
+
+    website_price = fields.Float('Website price', store=True, readonly=False, digits=dp.get_precision('Product Price'))
     online_website_price = fields.Float('Online price', related='website_price', readonly=False)
+    
+    '''
+    def _website_price(self):
+        qty = self._context.get('quantity', 1.0)
+        partner = self.env.user.partner_id
+        current_website = self.env['website'].get_current_website()
+        pricelist = current_website.get_current_pricelist()
+        company_id = current_website.company_id
+
+        context = dict(self._context, pricelist=pricelist.id, partner=partner)
+        self2 = self.with_context(context) if self._context != context else self
+
+        ret = self.env.user.has_group('sale.group_show_price_subtotal') and 'total_excluded' or 'total_included'
+
+        for p, p2 in pycompat.izip(self, self2):
+            taxes = partner.property_account_position_id.map_tax(p.sudo().taxes_id.filtered(lambda x: x.company_id == company_id))
+            p.website_price = taxes.compute_all(p2.price, pricelist.currency_id, quantity=qty, product=p2, partner=partner)[ret]
+            price_without_pricelist = taxes.compute_all(p.list_price, pricelist.currency_id)[ret]
+            p.website_price_difference = False if float_is_zero(price_without_pricelist - p.website_price, precision_rounding=pricelist.currency_id.rounding) else True
+            p.website_public_price = taxes.compute_all(p2.lst_price, quantity=qty, product=p2, partner=partner)[ret]
+    '''
 
 class Employee(models.Model):
     _inherit = 'hr.employee'
