@@ -1,0 +1,75 @@
+<odoo>
+  <data>
+
+    <record id="purchase_request.purchase_request_view_tree" model="ir.ui.view">
+      <field name="name">purchase.request.view.tree</field>
+      <field name="model">purchase_request.purchase_request</field>
+      <field name="type">tree</field>
+      <field name="mode">primary</field>
+      <field name="arch" type="xml">
+        <tree string="Purchase Request" create="true" delete="true" edit="true">
+          <field name="name" />
+          <field name="request_by" />
+          <field name="date" />
+          <field name="department_id" />
+        </tree>   
+      </field>
+    </record>
+    
+    <record id="view_form_purchase_request" model="ir.ui.view">
+      <field name="name">view.form.purchase.request</field>
+      <field name="model">purchase_request.purchase_request</field>
+      <field name="arch" type="xml">
+        <form string="Purchase Request" create="true" delete="true" edit="true">
+          <header>
+            <button name="submit_request" string="Submit" class="oe_highlight" type="object" states="draft" />
+            <button name="validate_request" string="Validate" class="oe_highlight" type="object" states="open"/>
+            <button name="approve_request" string="Approve" class="oe_highlight" type="object" states="validate" />
+            <field name="state" readonly="1" widget="statusbar" />
+          </header>
+          <sheet>
+              <div class="oe_title">
+                  <label for="name" class="oe_edit_only" />
+                  <h1><field name="name" placeholder="Describe the item..." /></h1>
+              </div>
+              <group>
+                <group>
+                  <field name="request_by" />
+                  <field name="date" />
+                  <field name="purchase_document" />
+                </group>
+                <group>
+                  <field name="department_id" />
+                  <field name="description" />
+                </group>
+              </group>
+              <notebook>
+                <page name="request_line" string="Request Line">
+                  <div>
+                    <field name="request_line" context="{'default_request_id': active_id}">
+                      <tree editable="bottom">
+                        <field name="product_id" />
+                        <field name="quantity" />
+                        <field name="comment" />
+                        <field name="request_id" />
+                      </tree>
+                    </field>
+                  </div>
+                </page>
+              </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="purchase_request.action_open_request_form" model="ir.actions.act_window">
+        <field name="name">purchase Request</field>
+        <field name="res_model">purchase_request.purchase_request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+  
+    <menuitem name="Purchase Request" id="purchase_request.menu_root"/>
+    <menuitem name="Purchase Request" id="purchase_request.menu_header" parent="purchase_request.menu_root"/>
+    <menuitem name="Request" id="purchase_request.menu_child" parent="purchase_request.menu_header" action="purchase_request.action_open_request_form"/>
+  </data>
+</odoo>
