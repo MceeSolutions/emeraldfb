@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record id="purhcase_req_update_from_ir" model="ir.ui.view">
+			<field name="name">purhcase_req_update_from_ir</field>
+			<field name="model">purchase.requisition</field>
+			<field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='company_id']" position="after">
+					<field name="from_ir" invisible="1"/>
+				</xpath>
+				<xpath expr="//notebook//field[@name='line_ids']/tree/field[@name='product_qty']" position="attributes">
+					<attribute name="attrs">{'readonly': [('parent.from_ir', '=', True)]}</attribute>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</odoo>

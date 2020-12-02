@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+	    <record model="ir.module.category" id="material_requisition_security">
+	    	<field name="name">Material Requisition</field>
+	    	<field name="sequence">202</field>
+	    </record>
+
+	    <record id="material_requisition_user" model="res.groups">
+	    	<field name="name" >User</field>
+	    	<field name="category_id" ref="material_requisition_security"/>
+			<field name="users" eval="[(4, ref('base.user_admin'))]"/>
+			<field name="implied_ids" eval="[(4, ref('base.user_admin'))]" />
+	    </record>
+
+	    <record id="material_requisition_dept_manager" model="res.groups">
+	    	<field name="name" >Department Manager</field>
+	    	<field name="category_id" ref="material_requisition_security"/>
+			<field name="users" eval="[(4, ref('base.user_admin'))]"/>
+			<field name="implied_ids" eval="[(4, ref('material_requisition_user'))]" />
+	    </record>
+
+	    <record id="material_requisition_main_manager" model="res.groups">
+	    	<field name="name" >Main Manager</field>
+	    	<field name="category_id" ref="material_requisition_security"/>
+			<field name="implied_ids" eval="[(4, ref('material_requisition_user'))]" />
+			<field name="users" eval="[(4, ref('base.user_admin'))]"/>
+	    </record>
+
+	    <record id="material_requisition_stock_officer" model="res.groups">
+	    	<field name="name">Warehouse Officer</field>
+	    	<field name="category_id" ref="material_requisition_security"/>
+			<field name="implied_ids" eval="[(4, ref('material_requisition_user'))]" />
+			<field name="users" eval="[(4, ref('base.user_admin'))]"/>
+	    </record>
+	    
+		<!-- Departmental manager see own department's records -->
+	    <record model="ir.rule" id="material_requsition_comp_manager_rule">
+	    	<field name="name">Material Requsition Department Rule</field>
+	    	<field name="model_id" ref="model_ng_ir_request"/>
+	    	<field name="global" eval="False"/>
+			<field name="groups" eval="[(4, ref('material_requisition_dept_manager'))]" />
+	    	<field name="domain_force">['|',('requester.department_id.manager_id.id','=',user.id),
+				('requester.id','=',user.id)]</field>
+	    </record>
+
+	    <record model="ir.rule" id="material_requsition_comp_manager_rule">
+	    	<field name="name">Material Requsition Manager See All</field>
+	    	<field name="model_id" ref="model_ng_ir_request"/>
+	    	<field name="global" eval="False"/>
+			<field name="groups" eval="[(4, ref('material_requisition_main_manager'))]" />
+	    	<field name="domain_force">[(1,'=',1)]</field>
+	    </record>
+		
+	    <record model="ir.rule" id="material_requsition_user_rule">
+	    	<field name="name">Material Requester</field>
+	    	<field name="model_id" ref="model_ng_ir_request"/>
+	    	<field name="global" eval="False"/>
+	    	<field name="groups" eval="[(4, ref('material_requisition.material_requisition_user'))]"/>
+	    	<field name="domain_force">[('create_uid','=',user.id)]</field>
+	    </record>
+
+	    <record model="ir.rule" id="material_requsition_user_rule">
+	    	<field name="name">Material Requester</field>
+	    	<field name="model_id" ref="model_ng_ir_request"/>
+	    	<field name="global" eval="False"/>
+	    	<field name="groups" eval="[(4, ref('material_requisition.material_requisition_user'))]"/>
+	    	<field name="domain_force">[('create_uid','=',user.id)]</field>
+	    </record>
+
+	</data>
+</odoo>
