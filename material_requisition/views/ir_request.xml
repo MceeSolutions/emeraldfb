@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-        <record model="ir.ui.view" id="ng_internal_requisition.list">
-            <field name="name">ng_internal_requisition list</field>
-            <field name="model">ng.ir.request</field>
+        <record model="ir.ui.view" id="material_requisition.list">
+            <field name="name">material_requisition list</field>
+            <field name="model">ir.request</field>
             <field name="arch" type="xml">
                 <tree colors="grey:state == 'done'">
                     <field name="name"/>
@@ -17,31 +17,31 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="ng_internal_requisition.form">
-            <field name="name">ng_internal_requisition form</field>
-            <field name="model">ng.ir.request</field>
+        <record model="ir.ui.view" id="material_requisition.form">
+            <field name="name">material_requisition form</field>
+            <field name="model">ir.request</field>
             <field name="arch" type="xml">
                 <form>
                     <header>
                         <button name="submit" states="draft" string="Submit" type="object"
-                                groups="ng_internal_requisition.ng_internal_requisition_user" class="oe_highlight"/>
+                                groups="material_requisition.material_requisition_user" class="oe_highlight"/>
                         <button name="department_manager_approve" states="submit" string="Approve" type="object"
-                                groups="ng_internal_requisition.ng_internal_requisition_dept_manager"
+                                groups="material_requisition.material_requisition_dept_manager"
                                 context="{'approved':True}" class="oe_highlight"/>
                         <button name="department_manager_approve" states="submit" string="Reject" type="object"
-                                groups="ng_internal_requisition.ng_internal_requisition_dept_manager"
+                                groups="material_requisition.material_requisition_dept_manager"
                                 context="{'approved':False}" class="oe_highlight"/>
 
                         <button name="proceed_after_procurement" 
                             string="Continue After Procurement" 
                             type="object"
-                            groups="ng_internal_requisition.ng_internal_requisition_stock_officer"
+                            groups="material_requisition.material_requisition_stock_officer"
                             class="oe_highlight" 
                             states="awaiting_procurement"/>
 
                         <button name="warehouse_officer_confirm_qty" string="Confirm Qty on Hand"
                                 type="object"
-                                groups="ng_internal_requisition.ng_internal_requisition_stock_officer"
+                                groups="material_requisition.material_requisition_stock_officer"
                                 class="oe_highlight"
                                 attrs="{'invisible': ['|', ('state', 'not in',['approve']), ('can_confirm', '=', True)]}"
                         />
@@ -119,9 +119,9 @@
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="ng_internal_requisition_action_window">
+        <record model="ir.actions.act_window" id="material_requisition_action_window">
             <field name="name">Requisition</field>
-            <field name="res_model">ng.ir.request</field>
+            <field name="res_model">ir.request</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
@@ -130,9 +130,9 @@
             </field>
         </record>
 
-        <menuitem name="Internal Requisition" id="ng_internal_requisition_menu_root"/>
+        <menuitem name="Internal Requisition" id="material_requisition_menu_root"/>
 
-        <menuitem name="Requisition" id="ng_internal_requisition_menu_1" parent="ng_internal_requisition_menu_root"
-                  action="ng_internal_requisition_action_window"/>
+        <menuitem name="Requisition" id="material_requisition_menu_1" parent="material_requisition_menu_root"
+                  action="material_requisition_action_window"/>
     </data>
 </odoo>

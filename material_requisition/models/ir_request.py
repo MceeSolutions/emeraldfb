@@ -17,7 +17,7 @@ class HRDepartment(models.Model):
 
 
 class IRRequest(models.Model):
-    _name = 'ng.ir.request'
+    _name = 'ir.request'
     _inherit = ['mail.thread']
     _description = "Internal Requisition"
     _order = 'create_date desc, state desc, write_date desc'
@@ -55,7 +55,7 @@ class IRRequest(models.Model):
                                       help='Departmental Stock Location', track_visibility='onchange')
     src_location_id = fields.Many2one(comodel_name='stock.location', string='Source Location',
                                       help='Departmental Stock Location', track_visibility='onchange')
-    approve_request_ids = fields.One2many(comodel_name='ng.ir.request.approve', inverse_name='request_id',
+    approve_request_ids = fields.One2many(comodel_name='ir.request.approve', inverse_name='request_id',
                                           string='Request Line', required=True)
     reason = fields.Text(string='Rejection Reason')
     availaibility = fields.Boolean(string='Availaibility', compute='_compute_availabilty')
@@ -181,11 +181,11 @@ class IRRequest(models.Model):
 
     @api.multi
     def submit(self, context):
-        seq = self.env['ir.sequence'].next_by_code('ng.ir.request')
+        seq = self.env['ir.sequence'].next_by_code('ir.request')
         recipient = self.recipient('hod', self.hod)
         url = self.request_link()
-        mail_template = self.env.ref('material_requisition.material_requisition_submit')
-        mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=True)
+        # mail_template = self.env.ref('material_requisition.material_requisition_submit')
+        # mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=True)
         self.write({'state': 'submit', 'name': seq})
 
     @api.multi
@@ -206,8 +206,8 @@ class IRRequest(models.Model):
                 # move to next level and send mail
                 url = self.request_link()
                 recipient = self.recipient('department_manager', self.department)
-                mail_template = self.env.ref('material_requisition.material_requisition_approval')
-                mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=True)
+                # mail_template = self.env.ref('material_requisition.material_requisition_approval')
+                # mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=True)
                 self.write({'state': 'approve'})
 
     @api.multi
@@ -295,8 +295,8 @@ class IRRequest(models.Model):
 
         url = self.request_link()
         recipient = self.recipient('department_manager', self.department)
-        mail_template = self.env.ref('material_requisition.material_requisition_transfer')
-        mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=False)
+        # mail_template = self.env.ref('material_requisition.material_requisition_transfer')
+        # mail_template.with_context({'recipient': recipient, 'url': url}).send_mail(self.id, force_send=False)
 
     def recipient(self, recipient, model):
         """Return recipient email address."""
@@ -321,7 +321,7 @@ class IRRequest(models.Model):
         fragment.update(base_url=base_url)
         fragment.update(
             menu_id=model_data.get_object_reference('material_requisition', 'material_requisition_menu_1')[-1])
-        fragment.update(model='ng.ir.request')
+        fragment.update(model='ir.request')
         fragment.update(view_type='form')
         fragment.update(
             action=model_data.get_object_reference('material_requisition', 'material_requisition_action_window')[

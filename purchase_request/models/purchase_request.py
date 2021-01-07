@@ -37,12 +37,17 @@ class purchase_request(models.Model):
 
     def approve_request(self):
         self.number = self.env['ir.sequence'].next_by_code('purchase_request.purchase_request')
+        picking_types = self.env['stock.picking.type'].search([('code', '=', 'incoming')])
+        picking_type_id = None
+        picking_type_company = picking_types.filtered(lambda picking_type: picking_type.warehouse_id.company_id == self.env.user.company_id)
+        if picking_type_company:
+            picking_type_id = picking_type_company.id
         purchase_order = self.env['purchase.order'].create({
             'date_order': datetime.now(),
             'partner_id': 23,
             'currency_id': self.env.user.company_id.currency_id.id,
             'company_id': self.env.user.company_id.id,
-            'picking_type_id': 2,
+            'picking_type_id': picking_type_id,
             'origin': self.number,
             'order_line': [(0, 0, {
                 'name': line.product_id.name,
