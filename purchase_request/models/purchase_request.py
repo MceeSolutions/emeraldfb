@@ -8,6 +8,7 @@ class purchase_request(models.Model):
     name = fields.Char("Description")
     number = fields.Char(string="Number", default="/")
     date = fields.Date("Request Date", default=datetime.now())
+    partner_id = fields.Many2one('res.partner', "Vendor")
     request_by = fields.Many2one("res.partner", "Requested By", default=lambda self: self.env.user.partner_id.id)
     description = fields.Text("Additional Comments")
     state = fields.Selection([
