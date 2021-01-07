@@ -1,0 +1,67 @@
+<odoo>
+  <data>
+    
+    <record id="material_request.material_request_tree" model="ir.ui.view">
+        <field name="name">Material Request List View</field>
+        <field name="model">material_request.material_request</field>
+        <field name="arch" type="xml">
+            <tree string="Material Request">
+                <field name="number" />
+                <field name="name" />
+                <field name="date" />
+                <field name="request_by" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="material_request.material_request_form" model="ir.ui.view">
+        <field name="name">Material Request List View</field>
+        <field name="model">material_request.material_request</field>
+        <field name="arch" type="xml">    
+            <form string="Material Request">
+                <sheet>
+                  <div class="oe_title">
+                      <label for="name" class="oe_edit_only" />
+                      <h1><field name="name" placeholder="Describe the item..." /></h1>
+                  </div>
+                  <group>
+                    <group>
+                      <field name="request_by" />
+                      <field name="date" />
+                      <field name="purchase_document" />
+                    </group>
+                    <group>
+                      <field name="department_id" />
+                      <field name="description" />
+                    </group>
+                  </group>
+                  <notebook>
+                    <page name="request_line" string="Request Line">
+                      <div>
+                        <field name="request_line" context="{'default_request_id': active_id}">
+                          <tree editable="bottom">
+                            <field name="product_id" />
+                            <field name="quantity" />
+                            <field name="comment" />
+                            <field name="request_id" />
+                          </tree>
+                        </field>
+                      </div>
+                    </page>
+                  </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="material_request.action_open_request_form" model="ir.actions.act_window">
+        <field name="name">Material Request</field>
+        <field name="res_model">material_request.material_request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Material Request" id="material_request.menu_root"/>
+    <menuitem name="Material Request" id="material_request.menu_header" parent="material_request.menu_root"/>
+    <menuitem name="Request" id="material_request.menu_child" parent="material_request.menu_header" action="material_request.action_open_request_form"/>
+  </data>
+</odoo>

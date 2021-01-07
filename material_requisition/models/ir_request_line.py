@@ -3,16 +3,16 @@ from odoo import models, fields, api
 
 
 class IRRequestLine(models.Model):
-    _name = 'ng.ir.request.line'
+    _name = 'ir.request.line'
 
-    request_id = fields.Many2one(comodel_name='ng.ir.request', string='Request') # Just catching cruise
+    request_id = fields.Many2one(comodel_name='ir.request', string='Request') # Just catching cruise
     product_id = fields.Char(string='Product')
     quantity = fields.Float(string='Quantity', default=1.0)
     uom = fields.Many2one(comodel_name='uom.uom', string='U.O.M')
 
 
 class IRRequestApprove(models.Model):
-    _name = 'ng.ir.request.approve'
+    _name = 'ir.request.approve'
 
     STATE = [
         ('not_available', 'Not Available'),
@@ -21,7 +21,7 @@ class IRRequestApprove(models.Model):
         ('awaiting', 'Awaiting Availability'),
     ]
 
-    request_id = fields.Many2one(comodel_name='ng.ir.request', string='Request')
+    request_id = fields.Many2one(comodel_name='ir.request', string='Request')
     product_id = fields.Many2one(comodel_name='product.product', string='Product')
     account_id = fields.Many2one('account.account', string="Account")
     name = fields.Char("Description")

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 	<data>
-		<record model="ir.ui.view" id="ng_internal_requisition.wizard">
-			<field name="name">ng_internal_requisition wizard</field>
+		<record model="ir.ui.view" id="material_requisition.wizard">
+			<field name="name">material_requisition wizard</field>
 			<field name="model">ir.request.wizard</field>
 			<field name="arch" type="xml">
 				<form>
