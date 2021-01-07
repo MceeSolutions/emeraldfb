@@ -39,6 +39,7 @@
                   <field name="purchase_document" />
                 </group>
                 <group>
+                  <field name="partner_id" context="{'search_default_supplier': 1, 'default_supplier': 1}" doamin="[('supplier', '=', True)]" required="True"/>
                   <field name="department_id" />
                   <field name="description" />
                 </group>
@@ -68,7 +69,7 @@
         <field name="view_mode">tree,form</field>
     </record>
   
-    <menuitem name="Purchase Request" id="purchase_request.menu_root"/>
+    <menuitem name="Purchase Request" id="purchase_request.menu_root" web_icon="purchase_request,static/description/icon.png"/>
     <menuitem name="Purchase Request" id="purchase_request.menu_header" parent="purchase_request.menu_root"/>
     <menuitem name="Request" id="purchase_request.menu_child" parent="purchase_request.menu_header" action="purchase_request.action_open_request_form"/>
   </data>
