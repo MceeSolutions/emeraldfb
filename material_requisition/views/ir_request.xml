@@ -10,7 +10,6 @@
                     <field name="requester"/>
                     <field name="end_user"/>
                     <field name="request_date"/>
-                    <field name="request_deadline"/>
                     <field name="hod"/>
                     <field name="state"/>
                 </tree>
@@ -59,7 +58,6 @@
                                 <field name="name" readonly="1"/>
                                 <field name="requester" required="1"/>
                                 <field name="request_date" required="1"/>
-                                <field name="request_deadline" required="1"/>
                                 <field name="warehouse_id"
                                        attrs="{'invisible': [('state', 'not in', ['approve', 'transfer', 'done'])]}"/>
                                 <field name="src_location_id"
@@ -68,8 +66,8 @@
                             </group>
                             <group>
                                 <field name="end_user"/>
-                                <field name="hod"/>
-                                <field name="department"/>
+                                <!-- <field name="hod"/> -->
+                                <!-- <field name="department"/> -->
                                 <field name="dst_location_id"/>
                                 <field name="analytic_account_id"/>
                             </group>
@@ -79,22 +77,17 @@
                                   attrs="{'invisible': ['|', ('reason', '=', False), ('state', '!=', 'draft')]}">
                                 <field name="reason" readonly="1"/>
                             </page>
-                            <page string='Product Database'>
+                            <page string='Request Lines'>
                                 <field name="approve_request_ids">
                                     <tree editable='top'>
                                         <field name="product_id" required="1"/>
                                         <field name="name" required="1"/>
-                                        <field name="account_id" attrs="{'column_invisible': [('parent.state', '!=', 'done')],
-                                        'required': [('parent.state', '!=', 'draft')]}"/>
+                                        <field name="account_id" />
                                         <field name="uom" required="1"/>
                                         <field name="quantity" required="1" attrs="{'readonly': [('parent.state', '=', 'awaiting_procurement')]}" />
                                         <field name="qty" string="Available Quantity"/>
                                         <field name="state" string="Availability"/>
-                                        <field name="purchase_agreement"/>
-                                        <field name="to_procure" invisible="1"/>
                                         <field name="transferred" readonly="1"/>
-                                        <button name="procure" type="object" string="Procure" class="oe_link"
-                                                attrs="{'invisible': ['|', ('to_procure', '!=', True), ('transferred', '=', True)]}"/>
                                     </tree>
                                 </field>
                             </page>
@@ -105,7 +98,7 @@
                                         <field name="journal_id"/>
                                     </group>
                                     <group>
-                                        <field name="move_id"/>
+                                        <field name="move_id" readonly="1"/>
                                     </group>
                                 </group>
                             </page>
@@ -130,7 +123,7 @@
             </field>
         </record>
 
-        <menuitem name="Internal Requisition" id="material_requisition_menu_root"/>
+        <menuitem name="Material Request" id="material_requisition_menu_root"/>
 
         <menuitem name="Requisition" id="material_requisition_menu_1" parent="material_requisition_menu_root"
                   action="material_requisition_action_window"/>
