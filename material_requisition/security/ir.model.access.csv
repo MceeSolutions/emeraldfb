@@ -1,9 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_ir_request_line,access_ir_request_line,model_ir_request_line,material_requisition_user,1,1,1,0
 access_ir_request_approve,access_ir_request_approve,model_ir_request_approve,material_requisition_user,1,1,1,0
 access_ir_request,access_ir_request,model_ir_request,material_requisition_user,1,1,1,0
 access_ng_hr_employee,access_ng_hr_employee,hr.model_hr_employee,material_requisition_user,1,1,0,0
-access_ir_request_line_admin,access_ir_request_line_admin,model_ir_request_line,base.user_root,1,1,1,1
 access_ir_request_approve_admin,access_ir_request_approve_admin,model_ir_request_approve,base.user_root,1,1,1,1
 access_ir_request_admin,access_ir_request_admin,model_ir_request,base.user_root,1,1,1,1
 access_ng_hr_employee_admin,access_ng_hr_employee_admin,hr.model_hr_employee,base.user_root,1,1,1,1
