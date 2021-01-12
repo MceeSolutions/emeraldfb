@@ -29,10 +29,8 @@
         'security/ir.model.access.csv',
         'data/mail_template.xml',
         'data/sequence.xml',
-        'views/hr_department.xml',
         'views/ir_request.xml',
         'views/res_company.xml',
-        'views/purchase_requisition_view.xml',
         'wizards/ir_request.xml',
     ],
 }

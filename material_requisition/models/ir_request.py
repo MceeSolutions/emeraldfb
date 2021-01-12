@@ -8,14 +8,6 @@ from odoo.exceptions import UserError, Warning
 from odoo import models, fields, api, _
 
 
-class HRDepartment(models.Model):
-    """."""
-
-    _inherit = 'hr.department'
-
-    location_id = fields.Many2one(comodel_name='stock.location', string='Stock Location')
-
-
 class IRRequest(models.Model):
     _name = 'ir.request'
     _inherit = ['mail.thread']
@@ -34,7 +26,6 @@ class IRRequest(models.Model):
     REQUEST_STAGE = [
         ('draft', 'Draft'),
         ('submit', 'Operations Manager'),
-        ('awaiting_procurement', "Awaiting Procurement"),
         ('approve', 'Warehouse'),
         ('transfer', 'Transfer'),
         ('done', 'Done')
@@ -48,7 +39,6 @@ class IRRequest(models.Model):
                                required=True)
     request_date = fields.Datetime(string='Request Date', default=lambda self: datetime.now(),
                                    help='The day in which request was initiated')
-    request_deadline = fields.Datetime(string='Request Deadline')
     hod = fields.Many2one(comodel_name='hr.employee', related='end_user.parent_id', string='H.O.D')
     department = fields.Many2one(comodel_name='hr.department', related='end_user.department_id', string='Department')
     dst_location_id = fields.Many2one(comodel_name='stock.location', string='Destination Location',
@@ -63,7 +53,7 @@ class IRRequest(models.Model):
     company_id = fields.Many2one('res.company', 'Company',
                                  default=lambda self: self.env['res.company']._company_default_get(),
                                  index=True, required=True)
-    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account/Vessel')
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account')
     move_id = fields.Many2one('account.move', 'Journal Entry', copy=False)
     move_name = fields.Char('Journal Name', copy=False)
     journal_id = fields.Many2one('account.journal', "Journal")
@@ -101,7 +91,7 @@ class IRRequest(models.Model):
             debit = reduce(lambda x, y: x + y, [line.get('credit', 0.0) for line in iml])
 
             iml.append({
-                'name': name,
+                'name': self.name or "/",
                 'account_id': request.account_id.id,
                 'currency_id': company_currency.id,
                 'date_maturity': fields.Date.context_today(self),
@@ -111,11 +101,10 @@ class IRRequest(models.Model):
             })
 
             iml = [(0, 0, line_item) for line_item in iml]
-
             move_vals = {
                 'ref': request.name,
                 'line_ids': iml,
-                'name': self.name,
+                'name': self.name or "/",
                 'journal_id': request.journal_id.id,
                 'date': fields.Date.context_today(self),
                 'partner_id': partner_id,
@@ -161,11 +150,6 @@ class IRRequest(models.Model):
         count_total = len(self.approve_request_ids)
         count_avail = len([appr_id.state for appr_id in self.approve_request_ids if appr_id.state == 'available'])
         self.availaibility = count_total == count_avail
-
-    @api.onchange('hod')
-    def _onchange_hod(self):
-        if self.department:
-            self.dst_location_id = self.department.location_id
 
     @api.model
     def create(self, vals):
@@ -217,7 +201,6 @@ class IRRequest(models.Model):
             raise UserError("No line(s) defined!")
         self._compute_confirm()
         for line in self.approve_request_ids:
-            line._compute_to_procure()
             line._compute_state()
         raise Warning("Please procure the items that are short in stock or process pending purchase agreements and try again!")
 
@@ -238,6 +221,7 @@ class IRRequest(models.Model):
                 "target": "new",
             }
         else:
+            self.name = self.env['ir.sequence'].next_by_code("ng.ir.request")
             # move to next level and send mail
             self.write({'state': 'transfer'})
 
@@ -269,7 +253,7 @@ class IRRequest(models.Model):
         for request_id in request_ids:
             payload = {
                 'product_id': request_id.product_id.id,
-                'name': request_id.product_id.display_name,
+                'name': request_id.product_id.name,
                 'product_uom_qty': request_id.quantity,
                 'product_uom': request_id.uom.id,
                 'picking_id': picking_id.id,
@@ -330,3 +314,76 @@ class IRRequest(models.Model):
         query = {'db': self.env.cr.dbname}
         res = urljoin(base_url, "?%s#%s" % (urlencode(query), urlencode(fragment)))
         return res
+
+
+class IRRequestApprove(models.Model):
+    _name = 'ir.request.approve'
+
+    STATE = [
+        ('not_available', 'Not Available'),
+        ('partially_available', 'Partially Available'),
+        ('available', 'Available'),
+        ('awaiting', 'Awaiting Availability'),
+    ]
+
+    request_id = fields.Many2one(comodel_name='ir.request', string='Request')
+    product_id = fields.Many2one(comodel_name='product.product', string='Product')
+    account_id = fields.Many2one('account.account', string="Account")
+    name = fields.Char("Description")
+    quantity = fields.Float(string='Quantity', default=1.0)
+    uom = fields.Many2one(comodel_name='product.uom', string='U.O.M')
+    qty = fields.Float(string='Qty Available', compute='_compute_qty')
+    state = fields.Selection(selection=STATE, string='State', compute='_compute_state', store=False)
+    transferred = fields.Boolean(string='Transferred', default=False)
+
+    @api.model
+    def create(self, vals):
+        if not vals.get("account_id", False):
+            product = self.env['product.product'].browse(vals.get('product_id'))
+            vals['account_id'] = product.categ_id.property_stock_valuation_account_id.id
+        return super(IRRequestApprove, self).create(vals)
+
+    @api.onchange('product_id')
+    def change_product(self):
+        if self.product_id:
+            self.uom = self.product_id.product_tmpl_id.uom_id.id
+            self.name = self.product_id.product_tmpl_id.name
+
+    @api.depends('product_id')
+    @api.one
+    def _compute_qty(self):
+        location_id = self.request_id.src_location_id.id
+        product_id = self.product_id.id
+        stock_quants = self.env['stock.quant'].search(
+            [('location_id', '=', location_id), ('product_id', '=', product_id)])
+        self.qty = sum([stock_quant.quantity for stock_quant in stock_quants])
+
+    @api.depends('qty')
+    @api.one
+    def _compute_state(self):
+        if self.qty <= 0:
+            self.state = 'not_available'
+        elif self.qty > 0 and self.qty < self.quantity:
+            self.state = 'partially_available'
+        else:
+            self.state = 'available'
+
+    @api.multi
+    def procure(self, context):
+        product_id, quantity = self.product_id, self.quantity - self.qty
+        requisition = self.env['purchase.requisition']
+        line = self.env['purchase.requisition.line']
+        request_identity = self.request_id.name
+        requisition_id = requisition.create({'from_ir': True})
+        payload = {
+            'product_id': product_id.id,
+            'product_uom_id': product_id.uom_id.id,
+            'product_qty': quantity,
+            'qty_ordered': quantity,
+            'requisition_id': requisition_id.id,
+            'price_unit': product_id.standard_price
+        }
+        line.create(payload)
+        origin = '{}/{}'.format(request_identity, requisition_id.name)
+        self.request_id.state = 'awaiting_procurement'
+        requisition_id.write({'name': origin})

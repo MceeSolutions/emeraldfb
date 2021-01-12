@@ -49,8 +49,5 @@ class Picking(models.Model):
             #  Expenses                                      | 500.00      |   0.00
             #  Stock valuation                               |   0.00      | 500.00
             #  Total                                         | 500.00      | 500.00
-
-
             journal_obj = self.env['account.journal']
-
         return True

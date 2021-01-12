@@ -52,7 +52,7 @@
                         <field name="product_id" />
                         <field name="quantity" />
                         <field name="comment" />
-                        <field name="request_id" />
+                        <field name="request_id" invisible="1" />
                       </tree>
                     </field>
                   </div>
