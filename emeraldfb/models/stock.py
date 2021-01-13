@@ -394,12 +394,14 @@ class PurchaseOrderLine(models.Model):
                 'price_subtotal': taxes['total_excluded'],
             })
 
+'''
 class HrSalaryRule(models.Model):
     _inherit = 'hr.salary.rule'
     _order = 'arrangement_sequence asc'
     
     arrangement_sequence = fields.Integer(required=False, index=True, default=5,
         help='Use to arrange sequence')
+'''
 
 class PurchaseReport(models.Model):
     _name = "purchase.report"
