@@ -170,7 +170,8 @@
 		</field>
 	</record>
 	
-	<!-- Hr Payslip Form -->
+	<!-- 
+	Hr Payslip Form 
 	<record id="emeraldfb_view_hr_payslip_form" model="ir.ui.view">
 		<field name="name">hr.payslip.form</field>
         <field name="model">hr.payslip</field>
@@ -183,6 +184,7 @@
 			</field>
 		</field>
 	</record>
+	-->
 	
 	<!-- Training Tracker action-->
     <record model="ir.actions.act_window" id="emeraldfb_training_tracker_action">
