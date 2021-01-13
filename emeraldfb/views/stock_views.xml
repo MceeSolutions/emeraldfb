@@ -257,6 +257,7 @@
 	        </field>
 	 	</record>
 	 	
+	 	<!--
 	 	<record id="emerald_hr_salary_rule_form" model="ir.ui.view">
             <field name="name">emeraldfb.hr.salary.rule.form</field>
             <field name="model">hr.salary.rule</field>
@@ -267,6 +268,7 @@
 	            </field>
 	        </field>
 	 	</record>
+	 	-->
 	    
 	    <record id="emeraldfb_purchase_form_view" model="ir.ui.view">
 	        <field name="name">emeraldfb.purchase.form</field>
