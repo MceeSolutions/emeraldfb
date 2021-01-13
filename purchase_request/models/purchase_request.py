@@ -44,7 +44,7 @@ class purchase_request(models.Model):
         if picking_type_company:
             if len(picking_type_company) > 1:
                 picking_type_id = picking_type_company[0].id
-            if else:
+            else:
                 picking_type_id = picking_type_company.id
         purchase_order = self.env['purchase.order'].create({
             'date_order': datetime.now(),
