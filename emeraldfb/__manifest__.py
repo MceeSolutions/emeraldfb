@@ -20,7 +20,7 @@
 
 
     # any module necessary for this one to work correctly
-    'depends': ['base','sale','website','hr','stock','purchase', 'hr_expense'],
+    'depends': ['base','sale','hr_expense','stock','purchase'],
 
     # always loaded
     'data': [
@@ -29,7 +29,7 @@
         'data/data.xml',
         'views/views.xml',
         'views/stock_views.xml',
-        'views/website_sale_templates.xml',
+        #'views/website_sale_templates.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

@@ -96,7 +96,7 @@ class TrainingTracker(models.Model):
         self.write({'state': 'reject'})
         return {}
     
-    
+'''    
 class Holidays(models.Model):
     _name = "hr.holidays"
     _inherit = 'hr.holidays'
@@ -146,6 +146,7 @@ class Holidays(models.Model):
                 if leaves and leaves[0].double_validation:
                     leaves.action_validate()
         return True
+'''
     
 class StaffRecruitment(models.Model):
     _name = "staff.recruitment"
@@ -409,7 +410,8 @@ class Contract(models.Model):
     
     overtime = fields.Float(string='Overtime', required=False, help="Employee's Overtime")
     deductions = fields.Float(string='Deductions', required=False, help="Employee's Deductions")
-    
+
+'''   
 class HrPayslip(models.Model):
     _name = 'hr.payslip'
     _inherit = 'hr.payslip'
@@ -422,7 +424,8 @@ class HrPayslipWorkedDays(models.Model):
     
     number_of_days = fields.Float(string='Absent Days')
  
-   
+'''
+     
 class PensionManager(models.Model):
     _name = 'pen.type'
     
