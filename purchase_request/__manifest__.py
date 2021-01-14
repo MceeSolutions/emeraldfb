@@ -18,13 +18,8 @@
     'depends': ['base', 'stock', 'purchase', 'hr'],
 
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'data/sequence.xml',
         'views/purchase_request_view.xml',
-        # 'views/templates.xml',
-    ],
-    
-    'demo': [
-        # 'demo/demo.xml',
     ],
 }
