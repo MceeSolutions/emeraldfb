@@ -13,7 +13,7 @@
     'website': "http://www.mceesolutions.com",
 
     'category': 'emeraldfb',
-    'version': '0.47',
+    'version': '0.48',
 
     'depends': [
         'base',
