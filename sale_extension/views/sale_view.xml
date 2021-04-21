@@ -15,6 +15,13 @@
                     <attribute name="attrs"></attribute>
                     <attribute name="readonly">1</attribute>
                 </xpath>
+                <xpath expr="//header/button[@name='action_cancel']" position="attributes">
+                    <attribute name="groups">hr.group_hr_manager</attribute>
+                    <attribute name="states">sale</attribute>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="action_cancel" states="draft,sent" type="object" string="Cancel"/>
+                </xpath>
             </field>
         </record>
 

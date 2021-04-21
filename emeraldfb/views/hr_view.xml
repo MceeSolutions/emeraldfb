@@ -58,20 +58,6 @@
 			</field>
 		</record>
 
-		<!-- Hr Payslip Form -->
-		<!-- <record id="emeraldfb_view_hr_payslip_form" model="ir.ui.view">
-			<field name="name">hr.payslip.form</field>
-			<field name="model">hr.payslip</field>
-			<field name="priority" eval="7" />
-			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
-			<field name="arch" type="xml">
-				<field name="payslip_run_id" position="after">
-					<field name="overtime"/>
-					<field name="deductions"/>
-				</field>
-			</field>
-		</record> -->
-
 		<record id="emerald_expense_form_view" model="ir.ui.view">
 			<field name="name">emerald.expense.form</field>
 			<field name="model">hr.expense</field>
@@ -107,17 +93,6 @@
 				</xpath>
 			</field>
 		</record>
-
-		<!-- <record id="emerald_hr_salary_rule_form" model="ir.ui.view">
-			<field name="name">emeraldfb.hr.salary.rule.form</field>
-			<field name="model">hr.salary.rule</field>
-			<field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>
-			<field name="arch" type="xml">
-				<field name="appears_on_payslip" position="after">
-					<field name="arrangement_sequence"/>
-				</field>
-			</field>
-		</record> -->
 
 	</data>
 </odoo>
