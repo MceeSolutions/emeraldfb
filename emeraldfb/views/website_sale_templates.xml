@@ -1,47 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 	<data>
-	
-	<template id="paid_thank_you" name="Thank you">
-		 <t t-call="website.layout">
-		     <form>
-		         <div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
-	         		 <h1 class="text-center"><i class="fa fa-check-circle fa-3x text-success" /></h1>
-		             <h1>Thank you, Paid Successfully!</h1>
-		             <h2>We are glad to confirm your payment for our product(s)</h2>
-		             <h4>Your order is currently  being processed</h4>
+
+		<template id="paid_thank_you" name="Thank you">
+			<t t-call="website.layout">
+				<form>
+					<div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
+						<h1 class="text-center">
+							<i class="fa fa-check-circle fa-3x text-success" />
+						</h1>
+						<h1>Thank you, Paid Successfully!</h1>
+						<h2>We are glad to confirm your payment for our product(s)</h2>
+						<h4>Your order is currently  being processed</h4>
 		             In the meantime,
-                     <h3 class="mt8 mb32">Look around on our website:</h3>
-                     <a href="/" class="btn btn-primary btn-lg">Continue To Our Website</a>
-		         </div>
-		     </form>
-		 </t>
-		 </template>
-		 
-		 <template id="payment_failed" name="Failed Payment">
-		 <t t-call="website.layout">
-		     <form>
-		         <div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
-	         		 <h1 class="text-center"><i class="fa fa-times-circle fa-3x text-danger" /></h1>
-		             <h1>Sorry, Payment Failed</h1>
-		             <h2>Something appaers to have gone wrong, please go back to the previous page and try again</h2>              
-		         </div>
-		     </form>
-		 </t>
-		 </template>
-		 
-		 <template id="payment_cancelled" name="Cancelled Payment">
-		 <t t-call="website.layout">
-		     <form>
-		         <div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
-	         		 <h1 class="text-center"><i class="fa fa-times-circle fa-3x text-danger" /></h1>
-		             <h1>Sorry, Payment Cancelled</h1>
-		             <h2>Something appaers to have gone wrong, please go back to the previous page and try again</h2>              
-		         </div>
-		     </form>
-		 </t>
-		 </template>
-		 
+						<h3 class="mt8 mb32">Look around on our website:</h3>
+						<a href="/" class="btn btn-primary btn-lg">Continue To Our Website</a>
+					</div>
+				</form>
+			</t>
+		</template>
+
+		<template id="payment_failed" name="Failed Payment">
+			<t t-call="website.layout">
+				<form>
+					<div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
+						<h1 class="text-center">
+							<i class="fa fa-times-circle fa-3x text-danger" />
+						</h1>
+						<h1>Sorry, Payment Failed</h1>
+						<h2>Something appaers to have gone wrong, please go back to the previous page and try again</h2>
+					</div>
+				</form>
+			</t>
+		</template>
+
+		<template id="payment_cancelled" name="Cancelled Payment">
+			<t t-call="website.layout">
+				<form>
+					<div class="form-group" style="text-align: center; padding-top: 11%; padding-bottom: 10%;">
+						<h1 class="text-center">
+							<i class="fa fa-times-circle fa-3x text-danger" />
+						</h1>
+						<h1>Sorry, Payment Cancelled</h1>
+						<h2>Something appaers to have gone wrong, please go back to the previous page and try again</h2>
+					</div>
+				</form>
+			</t>
+		</template>
 
 	</data>
 </odoo>
