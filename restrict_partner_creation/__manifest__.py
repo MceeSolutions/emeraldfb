@@ -21,6 +21,6 @@
     ],
 
     'data': [
-        # 'views/vendor_qualification_view.xml',
+        'views/partner_view.xml',
     ],
 }
