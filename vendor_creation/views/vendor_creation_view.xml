@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="vendor_qualification_tree_view" model="ir.ui.view">
+            <field name="name">vendor.qualification.tree.view</field>
+            <field name="model">vendor.qualification</field>
+            <field name="arch" type="xml">
+                <tree string="Vendor Qualification">
+                    <field name="name" />
+                    <field name="email" />
+                    <field name="website" />
+                    <field name="phone" />
+                    <field name="contact_name" />
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="vendor_qualification_form_view" model="ir.ui.view">
+            <field name="name">vendor.qualification.form.view</field>
+            <field name="model">vendor.qualification</field>
+            <field name="arch" type="xml">
+                <form string="Vendor Qualification">
+                    <header>
+                        <button name="submit" type="object" string="Submit" states="draft" />
+                        <button name="approve" type="object" string="Approve" states="submit" groups="project.group_project_manager" />
+                        <button name="reject" type="object" string="Reject" states="submit" groups="project.group_project_manager" />
+                        <button name="re_open" type="object" string="Set to Draft" states="reject" groups="project.group_project_manager" />
+                        <field name="state" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_vendor" type="object" class="oe_stat_button" icon="fa-contact">
+                                <field name="vendor_count" />
+                                <span>Vendors</span>
+                            </button>
+                        </div>
+                        <group>
+                            <group string="Primary Info">
+                                <field name="name" />
+                                <field name="email" />
+                                <field name="reg_number" />
+                                <field name="website" />
+                                <field name="phone" />
+                                <field name="street" />
+                                <field name="city" />
+                            </group>
+                            <group string="Contact">
+                                <field name="contact_name" />
+                                <field name="contact_phone" />
+                                <field name="contact_email" />
+                            </group>
+                            <div>
+                                <div>
+                                    <div>
+                                        <label for="submitted_by">Submitted by:</label>
+                                        <field name="submitted_by" />
+                                    </div>
+                                    <div>
+                                        <label for="date_submitted">Submitted on:</label>
+                                        <field name="date_submitted" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                        <label for="approved_by">Approved by:</label>
+                                        <field name="approved_by" />
+                                    </div>
+                                    <div>
+                                        <label for="date_approved">Approved on:</label>
+                                        <field name="date_approved" />
+                                    </div>
+                                </div>
+                            </div>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="vendor_qualification_action" model="ir.actions.act_window">
+            <field name="name">Vendor Qualification</field>
+            <field name="res_model">vendor.qualification</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="vendor_qualification" name="Vendor Qualification" />
+        <menuitem id="vendor_qualification_menu" name="Vendor Qualification" parent="vendor_qualification"/>
+        <menuitem id="vendor_qualification_menu_child" name="Vendor Qualification" parent="vendor_qualification_menu" action="vendor_qualification_action" />
+
+    </data>
+</odoo>

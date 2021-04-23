@@ -1,4 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ir_request_all,access_ir_request_all,model_ir_request,,1,1,1,1
+access_ir_request_approve_all,access_ir_request_approve_all,model_ir_request_approve,,1,1,1,1
 access_ir_request_approve,access_ir_request_approve,model_ir_request_approve,material_requisition_user,1,1,1,0
 access_ir_request,access_ir_request,model_ir_request,material_requisition_user,1,1,1,0
 access_ng_hr_employee,access_ng_hr_employee,hr.model_hr_employee,material_requisition_user,1,1,0,0
