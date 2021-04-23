@@ -18,7 +18,6 @@
     'depends': [
         'base',
         'sale',
-        'website',
         'hr',
         'stock',
         'purchase', 
@@ -37,6 +36,5 @@
         'views/purchase_view.xml',
         'views/recruitment_view.xml',
         'views/customer_request_view.xml',
-        'views/website_sale_templates.xml',
     ],
 }
